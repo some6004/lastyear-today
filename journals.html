@@ -40,7 +40,9 @@
 </div></div>
 
 <script>
-const customKey='lyt_journals';\nconst deletedKey='lyt_deleted_journals';\nconst DAY=24*60*60*1000;
+const customKey='lyt_journals';
+const deletedKey='lyt_deleted_journals';
+const DAY=24*60*60*1000;
 const samples=[
 'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=700&q=75',
 'https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=700&q=75',
@@ -53,7 +55,12 @@ const samples=[
 ];
 let editIndex=-1, selectedImage='';
 function getCustom(){try{return JSON.parse(localStorage.getItem(customKey)||'[]')}catch(e){return[]}}
-function saveCustom(a){localStorage.setItem(customKey,JSON.stringify(a))}\nfunction getDeleted(){try{return JSON.parse(localStorage.getItem(deletedKey)||'[]')}catch(e){return[]}}\nfunction saveDeleted(a){localStorage.setItem(deletedKey,JSON.stringify(a))}\nfunction purgeDeleted(){const now=Date.now();const kept=getDeleted().filter(j=>j.expiresAt>now);if(kept.length!==getDeleted().length)saveDeleted(kept);return kept}\nfunction formatDate(ts){const d=new Date(ts);return d.getFullYear()+'. '+String(d.getMonth()+1).padStart(2,'0')+'. '+String(d.getDate()).padStart(2,'0')}\nfunction daysLeft(ts){return Math.max(0,Math.ceil((ts-Date.now())/DAY))}
+function saveCustom(a){localStorage.setItem(customKey,JSON.stringify(a))}
+function getDeleted(){try{return JSON.parse(localStorage.getItem(deletedKey)||'[]')}catch(e){return[]}}
+function saveDeleted(a){localStorage.setItem(deletedKey,JSON.stringify(a))}
+function purgeDeleted(){const now=Date.now();const kept=getDeleted().filter(j=>j.expiresAt>now);if(kept.length!==getDeleted().length)saveDeleted(kept);return kept}
+function formatDate(ts){const d=new Date(ts);return d.getFullYear()+'. '+String(d.getMonth()+1).padStart(2,'0')+'. '+String(d.getDate()).padStart(2,'0')}
+function daysLeft(ts){return Math.max(0,Math.ceil((ts-Date.now())/DAY))}
 function openModal(index=-1){editIndex=index;const j=index>=0?getCustom()[index]:{name:'',desc:'',image:''};document.getElementById('modalTitle').textContent=index>=0?'기록장 수정하기':'새 기록장 만들기';document.getElementById('journalName').value=j.name||'';document.getElementById('journalDesc').value=j.desc||'';selectedImage=j.image||'';renderImages();document.getElementById('modal').classList.add('show');setTimeout(()=>document.getElementById('journalName').focus(),50)}
 function closeModal(){document.getElementById('modal').classList.remove('show')}
 function renderImages(){const box=document.getElementById('imageOptions');box.innerHTML=samples.map((url,i)=>'<button type="button" class="sample '+(selectedImage===url?'selected':'')+'" style="background-image:url('+url+')" onclick="selectSample('+i+')"></button>').join('');const p=document.getElementById('preview');if(selectedImage&&!samples.includes(selectedImage)){p.style.backgroundImage='url('+selectedImage+')';p.classList.add('show')}else{p.classList.remove('show');p.style.backgroundImage=''}}
@@ -76,10 +83,14 @@ function showDeleteWarning(step,name){
  box.classList.add('show');
 }
 function cancelDelete(){document.getElementById('deleteWarning').classList.remove('show');document.getElementById('deleteWarning').innerHTML='';document.getElementById('editActions').style.display='flex'}
-function deleteJournal(){if(editIndex<0)return;const a=getCustom();const j=a[editIndex];const now=Date.now();const deleted={...j,deletedAt:now,expiresAt:now+(7*DAY),deletedId:String(now)+'_'+Math.random().toString(36).slice(2)};a.splice(editIndex,1);saveCustom(a);const d=getDeleted().filter(x=>x.expiresAt>Date.now());d.unshift(deleted);saveDeleted(d.slice(0,20));editIndex=-1;cancelDelete();closeModal();render();renderDeleted()}\nfunction restoreJournal(id){const d=purgeDeleted();const idx=d.findIndex(j=>j.deletedId===id);if(idx<0)return;const j=d[idx];const a=getCustom();const restored={name:j.name,desc:j.desc,image:j.image||''};a.push(restored);saveCustom(a);d.splice(idx,1);saveDeleted(d);render();renderDeleted()}\nfunction renderDeleted(){const list=document.getElementById('deletedList');const section=document.getElementById('deletedSection');const d=purgeDeleted();if(!d.length){section.style.display='none';return}section.style.display='block';list.innerHTML=d.map(j=>{const left=daysLeft(j.expiresAt);return '<div class="deleted-card"><div class="deleted-thumb" style="background-image:url('+ (j.image||'') +')"></div><div class="deleted-info"><h3>'+escapeHtml(j.name)+'</h3><div class="deleted-meta">삭제일 '+formatDate(j.deletedAt)+'<br>완전히 사라지는 날 '+formatDate(j.expiresAt)+'</div><div class="deleted-days">'+(left===0?'오늘 삭제됩니다.':left+'일 남았습니다. · '+left+'일 후 완전히 없어집니다.')+'</div><button class="restore-btn" onclick="restoreJournal(\\''+j.deletedId+'\\')">복원하기 →</button></div></div>'}).join('')}
+function deleteJournal(){if(editIndex<0)return;const a=getCustom();const j=a[editIndex];const now=Date.now();const deleted={...j,deletedAt:now,expiresAt:now+(7*DAY),deletedId:String(now)+'_'+Math.random().toString(36).slice(2)};a.splice(editIndex,1);saveCustom(a);const d=getDeleted().filter(x=>x.expiresAt>Date.now());d.unshift(deleted);saveDeleted(d.slice(0,20));editIndex=-1;cancelDelete();closeModal();render();renderDeleted()}
+function restoreJournal(id){const d=purgeDeleted();const idx=d.findIndex(j=>j.deletedId===id);if(idx<0)return;const j=d[idx];const a=getCustom();const restored={name:j.name,desc:j.desc,image:j.image||''};a.push(restored);saveCustom(a);d.splice(idx,1);saveDeleted(d);render();renderDeleted()}
+function renderDeleted(){const list=document.getElementById('deletedList');const section=document.getElementById('deletedSection');const d=purgeDeleted();if(!d.length){section.style.display='none';return}section.style.display='block';list.innerHTML=d.map(j=>{const left=daysLeft(j.expiresAt);return '<div class="deleted-card"><div class="deleted-thumb" style="background-image:url('+ (j.image||'') +')"></div><div class="deleted-info"><h3>'+escapeHtml(j.name)+'</h3><div class="deleted-meta">삭제일 '+formatDate(j.deletedAt)+'<br>완전히 사라지는 날 '+formatDate(j.expiresAt)+'</div><div class="deleted-days">'+(left===0?'오늘 삭제됩니다.':left+'일 남았습니다. · '+left+'일 후 완전히 없어집니다.')+'</div><button class="restore-btn" onclick="restoreJournal(\\''+j.deletedId+'\\')">복원하기 →</button></div></div>'}).join('')}
 function saveJournal(){const name=document.getElementById('journalName').value.trim();const desc=document.getElementById('journalDesc').value.trim()||'나만의 기록을 차곡차곡 남깁니다.';if(!name)return;const a=getCustom();const item={name,desc,image:selectedImage};if(editIndex>=0)a[editIndex]=item;else a.push(item);saveCustom(a);closeModal();render()}
 function render(){const custom=getCustom();const box=document.getElementById('journals');box.querySelectorAll('.custom-journal').forEach(el=>el.remove());const empty=document.getElementById('empty');const intro=document.getElementById('emptyIntro');const sectionHead=document.querySelector('.section-head');const has=custom.length>0;intro.style.display=has?'none':'grid';empty.style.display=has?'none':'block';sectionHead.style.display=has?'flex':'none';custom.forEach((j,i)=>{const el=document.createElement('div');el.className='journal custom-journal'+(j.image?' has-image':'');if(j.image)el.style.backgroundImage='url('+j.image+')';el.innerHTML='<a class="edit-link" href="#" onclick="openModal('+i+');return false">수정</a><div class="journal-top"><div class="journal-kind">MY JOURNAL</div><h3>'+escapeHtml(j.name)+'</h3><p>'+escapeHtml(j.desc)+'</p></div><div class="journal-bottom"><span class="journal-count">새 기록</span><a class="journal-link" href="write.html?journal='+encodeURIComponent(j.name)+'">기록하기 →</a></div>';box.insertBefore(el,box.querySelector('.add'))})}
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
-render();\nrenderDeleted();\n</script>
+render();
+renderDeleted();
+</script>
 </body>
 </html>
