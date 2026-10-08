@@ -9,37 +9,22 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500&display=swap">
 <style>
 :root{--paper:#f3f0e9;--ink:#24231f;--soft:#77736b;--faint:#aaa59c;--rule:#d7d2c9;--card:#fffdf8}
-*{box-sizing:border-box}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
-.page{max-width:980px;margin:auto;padding:0 34px}
-.top{height:92px;border-bottom:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
+.page{max-width:980px;margin:auto;padding:0 34px}.top{height:92px;border-bottom:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between}
 .logo{font:400 24px "Noto Serif KR",serif;letter-spacing:-.09em;text-decoration:none}.logo span{display:inline-block}.logo span:nth-child(1){color:#c99da5}.logo span:nth-child(2){color:#9eaf98}.logo span:nth-child(3){color:#c4af91}.logo span:nth-child(4){color:#a89bb2}
-.top a:last-child{text-decoration:none;color:var(--soft);font-size:13px}
-.main{padding:78px 0 110px}
-.eyebrow{font-size:11px;letter-spacing:.18em;color:#8a857c;margin-bottom:20px}
-h1{font:400 clamp(44px,6vw,70px)/1.18 "Noto Serif KR",serif;letter-spacing:-.07em;margin:0}
-.lead{margin:25px 0 0;color:var(--soft);font-size:14px;line-height:1.9}
-.ask-area{margin-top:60px;border-top:1px solid var(--ink);border-bottom:1px solid var(--rule);padding:28px 0 24px}
-.ask-label{font-size:11px;color:var(--faint);letter-spacing:.12em;margin-bottom:12px}
-textarea{width:100%;min-height:150px;border:0;background:transparent;resize:vertical;outline:none;font:400 23px/1.7 "Noto Serif KR",serif;letter-spacing:-.04em;color:var(--ink)}
-textarea::placeholder{color:#b6b1a8}
-.ask-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:15px}
-.status{font-size:11px;color:var(--faint)}
-.ask-btn{border:0;border-bottom:1px solid var(--ink);background:none;padding:8px 0;font:500 13px Pretendard;cursor:pointer;color:var(--ink)}
-.examples{margin-top:62px}
-.examples h2{font:400 30px "Noto Serif KR",serif;letter-spacing:-.05em;margin:0}
-.example-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0 45px;margin-top:25px;border-top:1px solid var(--rule)}
-.example{padding:22px 0;border-bottom:1px solid var(--rule);cursor:pointer}
-.example strong{display:block;font:400 16px/1.65 "Noto Serif KR",serif;letter-spacing:-.03em}
-.example span{display:block;margin-top:7px;color:var(--faint);font-size:11px}
-.memory-note{margin-top:65px;padding:25px 0;border-top:1px solid var(--rule);color:var(--soft);font-size:12px;line-height:1.9}
-.memory-note strong{color:var(--ink);font:400 18px "Noto Serif KR",serif;display:block;margin-bottom:5px}
-.answer{display:none;margin-top:35px;background:var(--card);border:1px solid var(--rule);padding:28px}
-.answer.show{display:block}.answer-label{font-size:10px;letter-spacing:.15em;color:var(--faint);margin-bottom:13px}.answer p{margin:0;font:400 17px/1.8 "Noto Serif KR",serif;letter-spacing:-.03em}
+.top a:last-child{text-decoration:none;color:var(--soft);font-size:13px}.main{padding:78px 0 110px}.eyebrow{font-size:11px;letter-spacing:.18em;color:#8a857c;margin-bottom:20px}
+h1{font:400 clamp(44px,6vw,70px)/1.18 "Noto Serif KR",serif;letter-spacing:-.07em;margin:0}.lead{margin:25px 0 0;color:var(--soft);font-size:14px;line-height:1.9}
+.ask-area{margin-top:60px;border-top:1px solid var(--ink);border-bottom:1px solid var(--rule);padding:28px 0 24px}.ask-label{font-size:11px;color:var(--faint);letter-spacing:.12em;margin-bottom:12px}
+textarea{width:100%;min-height:150px;border:0;background:transparent;resize:vertical;outline:none;font:400 23px/1.7 "Noto Serif KR",serif;letter-spacing:-.04em;color:var(--ink)}textarea::placeholder{color:#b6b1a8}
+.ask-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:15px}.status{font-size:11px;color:var(--faint)}.ask-btn{border:0;border-bottom:1px solid var(--ink);background:none;padding:8px 0;font:500 13px Pretendard;cursor:pointer;color:var(--ink)}
+.examples{margin-top:62px}.examples h2{font:400 30px "Noto Serif KR",serif;letter-spacing:-.05em;margin:0}.example-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0 45px;margin-top:25px;border-top:1px solid var(--rule)}
+.example{padding:22px 0;border-bottom:1px solid var(--rule);cursor:pointer}.example strong{display:block;font:400 16px/1.65 "Noto Serif KR",serif;letter-spacing:-.03em}.example span{display:block;margin-top:7px;color:var(--faint);font-size:11px}
+.memory-note{margin-top:65px;padding:25px 0;border-top:1px solid var(--rule);color:var(--soft);font-size:12px;line-height:1.9}.memory-note strong{color:var(--ink);font:400 18px "Noto Serif KR",serif;display:block;margin-bottom:5px}
+.answer{display:none;margin-top:35px;background:var(--card);border:1px solid var(--rule);padding:28px}.answer.show{display:block}.answer-label{font-size:10px;letter-spacing:.15em;color:var(--faint);margin-bottom:13px}.answer p{margin:0;font:400 17px/1.8 "Noto Serif KR",serif;letter-spacing:-.03em}
 .footer{border-top:1px solid var(--rule);padding:28px 0 45px;color:var(--faint);font-size:11px;display:flex;justify-content:space-between}
 @media(max-width:700px){
 .page{padding:0 20px}.top{height:72px}.main{padding:50px 0 80px}
-h1{font-size:clamp(38px,11vw,52px)}.lead{font-size:13px}.ask-area{margin-top:42px}
+h1{font-size:clamp(31px,8.5vw,40px);line-height:1.25;letter-spacing:-.065em}.lead{margin-top:20px;font-size:13px}.ask-area{margin-top:38px}
 textarea{min-height:135px;font-size:19px}.ask-bottom{align-items:end}.example-grid{grid-template-columns:1fr}.examples{margin-top:52px}.examples h2{font-size:27px}
 .footer{display:block}.footer span{display:block;margin-top:8px}
 }
@@ -47,63 +32,29 @@ textarea{min-height:135px;font-size:19px}.ask-bottom{align-items:end}.example-gr
 </head>
 <body>
 <div class="page">
-<header class="top">
-<a class="logo" href="index.html"><span>작</span><span>년</span><span>,</span><span> 오늘</span></a>
-<a href="journals.html">내 기록장으로</a>
-</header>
-
+<header class="top"><a class="logo" href="index.html"><span>작</span><span>년</span><span>,</span><span> 오늘</span></a><a href="journals.html">내 기록장으로</a></header>
 <main class="main">
 <div class="eyebrow">AI MEMORY · ASK YOUR RECORDS</div>
 <h1>내 기록에게<br>무엇이든 물어보세요.</h1>
 <p class="lead">기록장을 나누어 관리해도 괜찮아요.<br>내가 허용한 기록을 AI가 함께 연결해 필요한 정보를 찾아드립니다.</p>
-
-<section class="ask-area">
-<div class="ask-label">ASK MY RECORDS</div>
-<textarea id="question" placeholder="예: 작년 여름에 내가 갔던 여행을 정리해줘."></textarea>
-<div class="ask-bottom">
-<span class="status" id="status">아직 AI가 연결되지 않았습니다.</span>
-<button class="ask-btn" onclick="ask()">질문하기 →</button>
-</div>
-</section>
-
-<section class="answer" id="answer">
-<div class="answer-label">AI ANSWER · DEMO</div>
-<p id="answerText"></p>
-</section>
-
-<section class="examples">
-<h2>이렇게 물어볼 수 있어요.</h2>
-<div class="example-grid">
+<section class="ask-area"><div class="ask-label">ASK MY RECORDS</div><textarea id="question" placeholder="예: 작년 여름에 내가 갔던 여행을 정리해줘."></textarea><div class="ask-bottom"><span class="status" id="status">아직 AI가 연결되지 않았습니다.</span><button class="ask-btn" onclick="ask()">질문하기 →</button></div></section>
+<section class="answer" id="answer"><div class="answer-label">AI ANSWER · DEMO</div><p id="answerText"></p></section>
+<section class="examples"><h2>이렇게 물어볼 수 있어요.</h2><div class="example-grid">
 <div class="example" onclick="fill('작년 여름에 내가 갔던 여행을 정리해줘.')"><strong>“작년 여름에 내가 갔던 여행을 정리해줘.”</strong><span>여행 기록 · 날짜 · 장소</span></div>
 <div class="example" onclick="fill('내가 지난 1년 동안 했던 일을 이력서에 쓸 경력으로 정리해줘.')"><strong>“지난 1년 동안 했던 일을 이력서에 쓸 경력으로 정리해줘.”</strong><span>업무 기록 · 기간 · 역할</span></div>
 <div class="example" onclick="fill('작년보다 올해 내가 달라진 점을 알려줘.')"><strong>“작년보다 올해 내가 달라진 점을 알려줘.”</strong><span>기간 비교 · 변화</span></div>
 <div class="example" onclick="fill('내가 올해 가장 많이 한 일은 뭐야?')"><strong>“내가 올해 가장 많이 한 일은 뭐야?”</strong><span>기록 분석 · 패턴</span></div>
 <div class="example" onclick="fill('우리 아이의 성장 기록을 날짜순으로 정리해줘.')"><strong>“우리 아이의 성장 기록을 날짜순으로 정리해줘.”</strong><span>육아 기록 · 수치 · 성장</span></div>
 <div class="example" onclick="fill('내가 그때 왜 그렇게 했는지 기록에서 찾아줘.')"><strong>“내가 그때 왜 그렇게 했는지 기록에서 찾아줘.”</strong><span>생각 · 상황 · 맥락</span></div>
-</div>
-</section>
-
-<div class="memory-note">
-<strong>기록장은 나눠도, AI에게는 하나의 삶입니다.</strong>
-일기, 육아일지, 업무일지처럼 기록을 나누어도 내가 허용한 범위 안에서 모든 기록을 연결해 질문할 수 있습니다.
-</div>
+</div></section>
+<div class="memory-note"><strong>기록장은 나눠도, AI에게는 하나의 삶입니다.</strong>일기, 육아일지, 업무일지처럼 기록을 나누어도 내가 허용한 범위 안에서 모든 기록을 연결해 질문할 수 있습니다.</div>
 </main>
-
 <footer class="footer"><span>© 2026 작년, 오늘</span><span>나의 모든 기록을 기억하는 개인 AI 아카이브</span></footer>
 </div>
 <script>
-const q=document.getElementById('question');
-const statusEl=document.getElementById('status');
-const answer=document.getElementById('answer');
-const answerText=document.getElementById('answerText');
+const q=document.getElementById('question'),statusEl=document.getElementById('status'),answer=document.getElementById('answer'),answerText=document.getElementById('answerText');
 function fill(text){q.value=text;q.focus();window.scrollTo({top:q.getBoundingClientRect().top+window.scrollY-90,behavior:'smooth'})}
-function ask(){
- const text=q.value.trim();
- if(!text){q.focus();return}
- statusEl.textContent='AI 연결 준비 중입니다.';
- answer.classList.add('show');
- answerText.textContent='현재는 화면과 질문 흐름을 먼저 준비한 데모입니다. AI가 연결되면 내 기록을 검색하고 여러 기록을 연결해 이 질문에 대한 답을 보여드릴 수 있습니다.';
-}
+function ask(){const text=q.value.trim();if(!text){q.focus();return}statusEl.textContent='AI 연결 준비 중입니다.';answer.classList.add('show');answerText.textContent='현재는 화면과 질문 흐름을 먼저 준비한 데모입니다. AI가 연결되면 내 기록을 검색하고 여러 기록을 연결해 이 질문에 대한 답을 보여드릴 수 있습니다.'}
 q.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter')ask()});
 </script>
 </body>
