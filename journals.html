@@ -65,10 +65,11 @@ function showDeleteWarning(step,name){
  const box=document.getElementById('deleteWarning');
  const actions=document.getElementById('editActions');
  actions.style.display='none';
+ const safeName=encodeURIComponent(name);
  if(step===1){
-  box.innerHTML='<h3>기록장을 삭제할까요?</h3><p><strong>'+escapeHtml(name)+'</strong> 기록장을 삭제하면 이 기록장에 들어 있는 모든 기록과 사진이 함께 사라질 수 있습니다.</p><div class="delete-actions"><button onclick="cancelDelete()">취소</button><button class="delete-confirm" onclick="showDeleteWarning(2,\\''+String(name).replace(/'/g,"&#039;")+'\\')">다음 확인 →</button></div>';
+  box.innerHTML='<h3>기록장을 삭제할까요?</h3><p><strong>'+escapeHtml(name)+'</strong> 기록장을 삭제하면 이 기록장에 들어 있는 모든 기록과 사진이 함께 사라질 수 있습니다.</p><div class="delete-actions"><button onclick="cancelDelete()">취소</button><button class="delete-confirm" onclick="showDeleteWarning(2,decodeURIComponent(\''+safeName+'\'))">다음 확인 →</button></div>';
  }else if(step===2){
-  box.innerHTML='<h3>정말 삭제하시겠어요?</h3><p><strong>'+escapeHtml(name)+'</strong> 안에 작성한 일기, 사진, 날짜별 기록 등 모든 내용이 삭제됩니다.<br>삭제 후에는 되돌릴 수 없습니다.</p><div class="delete-actions"><button onclick="cancelDelete()">취소</button><button class="delete-confirm" onclick="showDeleteWarning(3,\\''+String(name).replace(/'/g,"&#039;")+'\\')">한 번 더 확인 →</button></div>';
+  box.innerHTML='<h3>정말 삭제하시겠어요?</h3><p><strong>'+escapeHtml(name)+'</strong> 안에 작성한 일기, 사진, 날짜별 기록 등 모든 내용이 삭제됩니다.<br>삭제 후에는 되돌릴 수 없습니다.</p><div class="delete-actions"><button onclick="cancelDelete()">취소</button><button class="delete-confirm" onclick="showDeleteWarning(3,decodeURIComponent(\''+safeName+'\'))">한 번 더 확인 →</button></div>';
  }else{
   box.innerHTML='<h3>마지막 확인입니다.</h3><p><strong>'+escapeHtml(name)+'</strong> 기록장과 그 안의 모든 기록을 영구적으로 삭제합니다.<br>이 작업은 되돌릴 수 없습니다.</p><div class="delete-actions"><button onclick="cancelDelete()">취소</button><button class="delete-confirm" onclick="deleteJournal()">영구 삭제하기</button></div>';
  }
