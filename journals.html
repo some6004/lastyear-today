@@ -120,5 +120,6 @@ function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':
 render();
 renderDeleted();
 try{const d=JSON.parse(localStorage.getItem("lyt_my_info")||"{}");if(d.name)document.getElementById("profileGreeting").textContent=d.name+"님, 오늘의 일상은 어땠나요?";if(d.description)document.getElementById("profileDescription").textContent=d.description;}catch(e){}
+</script>
 </body>
 </html>
