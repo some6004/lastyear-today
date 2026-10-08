@@ -119,9 +119,6 @@ function render(){const custom=getCustom();const box=document.getElementById('jo
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 render();
 renderDeleted();
-<script>
-try{const d=JSON.parse(localStorage.getItem('lyt_my_info')||'null');if(d){if(d.name)document.getElementById('profileGreeting').textContent=d.name+'님, 오늘의 일상은 어땠나요?';if(d.description)document.getElementById('profileDescription').textContent=d.description;}}
-catch(e){}
-</script>
+try{const d=JSON.parse(localStorage.getItem("lyt_my_info")||"{}");if(d.name)document.getElementById("profileGreeting").textContent=d.name+"님, 오늘의 일상은 어땠나요?";if(d.description)document.getElementById("profileDescription").textContent=d.description;}catch(e){}
 </body>
 </html>
