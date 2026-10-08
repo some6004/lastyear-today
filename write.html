@@ -78,6 +78,8 @@ function swipeStart(x,y){sx=x;sy=y;dragging=true;swipe.classList.add('dragging')
 function swipeMove(x){if(!dragging)return;const dx=x-sx;const card=document.querySelector('.memory-card.center');if(card&&Math.abs(dx)>8)card.style.transform='translateX('+Math.max(-90,Math.min(90,dx))+'px) rotate('+(dx*.01)+'deg)'}
 function swipeEnd(x,y){if(!dragging)return;dragging=false;swipe.classList.remove('dragging');const dx=x-sx,dy=y-sy;const card=document.querySelector('.memory-card.center');if(card)card.style.transform='';if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy))moveMemory(dx<0?1:-1)}
 swipe.addEventListener('touchstart',e=>swipeStart(e.touches[0].clientX,e.touches[0].clientY),{passive:true});swipe.addEventListener('touchmove',e=>swipeMove(e.touches[0].clientX),{passive:true});swipe.addEventListener('touchend',e=>{const t=e.changedTouches[0];swipeEnd(t.clientX,t.clientY)},{passive:true});swipe.addEventListener('mousedown',e=>swipeStart(e.clientX,e.clientY));window.addEventListener('mousemove',e=>{if(dragging)swipeMove(e.clientX)});window.addEventListener('mouseup',e=>{if(dragging)swipeEnd(e.clientX,e.clientY)});
+function updatePrivacyStatus(){const pub=document.getElementById('public').checked;document.getElementById('status').textContent=pub?'공개 기록으로 저장합니다.':'당신만의 비공개 기록으로 남습니다.'}
+function saveRecord(){const pub=document.getElementById('public').checked;document.getElementById('status').textContent=pub?'공개 기록으로 저장했습니다.':'비공개 기록으로 저장했습니다.'}
 renderMemory();
 </script>
 </body></html>
