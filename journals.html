@@ -85,7 +85,30 @@ function showDeleteWarning(step,name){
 function cancelDelete(){document.getElementById('deleteWarning').classList.remove('show');document.getElementById('deleteWarning').innerHTML='';document.getElementById('editActions').style.display='flex'}
 function deleteJournal(){if(editIndex<0)return;const a=getCustom();const j=a[editIndex];const now=Date.now();const deleted={...j,deletedAt:now,expiresAt:now+(7*DAY),deletedId:String(now)+'_'+Math.random().toString(36).slice(2)};a.splice(editIndex,1);saveCustom(a);const d=getDeleted().filter(x=>x.expiresAt>Date.now());d.unshift(deleted);saveDeleted(d.slice(0,20));editIndex=-1;cancelDelete();closeModal();render();renderDeleted()}
 function restoreJournal(id){const d=purgeDeleted();const idx=d.findIndex(j=>j.deletedId===id);if(idx<0)return;const j=d[idx];const a=getCustom();const restored={name:j.name,desc:j.desc,image:j.image||''};a.push(restored);saveCustom(a);d.splice(idx,1);saveDeleted(d);render();renderDeleted()}
-function renderDeleted(){const list=document.getElementById('deletedList');const section=document.getElementById('deletedSection');const d=purgeDeleted();if(!d.length){section.style.display='none';return}section.style.display='block';list.innerHTML=d.map(j=>{const left=daysLeft(j.expiresAt);return '<div class="deleted-card"><div class="deleted-thumb" style="background-image:url('+ (j.image||'') +')"></div><div class="deleted-info"><h3>'+escapeHtml(j.name)+'</h3><div class="deleted-meta">삭제일 '+formatDate(j.deletedAt)+'<br>완전히 사라지는 날 '+formatDate(j.expiresAt)+'</div><div class="deleted-days">'+(left===0?'오늘 삭제됩니다.':left+'일 남았습니다. · '+left+'일 후 완전히 없어집니다.')+'</div><button class="restore-btn" onclick="restoreJournal(\\''+j.deletedId+'\\')">복원하기 →</button></div></div>'}).join('')}
+function renderDeleted(){
+ const list=document.getElementById('deletedList');
+ const section=document.getElementById('deletedSection');
+ const d=purgeDeleted();
+ if(!d.length){section.style.display='none';return}
+ section.style.display='block';
+ list.innerHTML=d.map(j=>{
+   const left=daysLeft(j.expiresAt);
+   const thumb=j.image||'';
+   const daysText=left===0?'오늘 삭제됩니다.':left+'일 남았습니다. · '+left+'일 후 완전히 없어집니다.';
+   return `<div class="deleted-card">
+     <div class="deleted-thumb" style="background-image:url("${thumb}")"></div>
+     <div class="deleted-info">
+       <h3>${escapeHtml(j.name)}</h3>
+       <div class="deleted-meta">삭제일 ${formatDate(j.deletedAt)}<br>완전히 사라지는 날 ${formatDate(j.expiresAt)}</div>
+       <div class="deleted-days">${daysText}</div>
+       <button class="restore-btn" type="button" data-id="${j.deletedId}">복원하기 →</button>
+     </div>
+   </div>`;
+ }).join('');
+ list.querySelectorAll('.restore-btn').forEach(btn=>{
+   btn.addEventListener('click',()=>restoreJournal(btn.dataset.id));
+ });
+}
 function saveJournal(){const name=document.getElementById('journalName').value.trim();const desc=document.getElementById('journalDesc').value.trim()||'나만의 기록을 차곡차곡 남깁니다.';if(!name)return;const a=getCustom();const item={name,desc,image:selectedImage};if(editIndex>=0)a[editIndex]=item;else a.push(item);saveCustom(a);closeModal();render()}
 function render(){const custom=getCustom();const box=document.getElementById('journals');box.querySelectorAll('.custom-journal').forEach(el=>el.remove());const empty=document.getElementById('empty');const intro=document.getElementById('emptyIntro');const sectionHead=document.querySelector('.section-head');const has=custom.length>0;intro.style.display=has?'none':'grid';empty.style.display=has?'none':'block';sectionHead.style.display=has?'flex':'none';custom.forEach((j,i)=>{const el=document.createElement('div');el.className='journal custom-journal'+(j.image?' has-image':'');if(j.image)el.style.backgroundImage='url('+j.image+')';el.innerHTML='<a class="edit-link" href="#" onclick="openModal('+i+');return false">수정</a><div class="journal-top"><div class="journal-kind">MY JOURNAL</div><h3>'+escapeHtml(j.name)+'</h3><p>'+escapeHtml(j.desc)+'</p></div><div class="journal-bottom"><span class="journal-count">새 기록</span><a class="journal-link" href="write.html?journal='+encodeURIComponent(j.name)+'">기록하기 →</a></div>';box.insertBefore(el,box.querySelector('.add'))})}
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
