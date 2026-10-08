@@ -18,7 +18,7 @@
 <main class="main">
 <section class="intro" id="emptyIntro"><div><div class="eyebrow">MY JOURNALS</div><h1 class="title">무엇을 기록할지<br>먼저 정해보세요.</h1></div><p>하나의 기록장에는 하나의 주제를 담아보세요.<br>일기와 육아일지, 업무일지를 나누어 기록하면 시간이 쌓일수록 나만의 기록이 더 선명해집니다.</p></section>
 <div class="ai-all-note"><strong>기록장은 나눠도, AI에게는 하나의 삶입니다.</strong><span>어떤 기록장에 남겼든, 내가 허용한 모든 기록을 함께 연결해 질문에 답해드립니다.</span><a class="ai-question-link" href="ai.html">AI에게 내 기록 질문하기 →</a></div>
-<section class="profile"><span class="profile-label">ABOUT ME</span><div><span class="profile-name">내 기록</span><span class="profile-info">나에 대해 간단히 설정해보세요.</span></div><a class="profile-edit" href="my-info.html">수정하기 →</a></section>
+<section class="profile"><div><span class="profile-name" id="profileGreeting">오늘의 일상은 어땠나요?</span><span class="profile-info" id="profileDescription">나에 대해 간단히 설정해보세요.</span></div><a class="profile-edit" href="my-info.html">수정하기 →</a></section>
 <section><div class="section-head"><div><h2>나의 기록장</h2><p>기록장은 여러 개 만들 수 있습니다.</p></div></div>
 <div class="journals" id="journals"><button class="add" type="button" onclick="openModal()"><span class="plus">＋</span><strong>새 기록장 만들기</strong><span>여행 · 운동 · 공부 · 프로젝트 등</span></button></div>
 <div class="empty" id="empty"><h3>아직 기록장이 없습니다.</h3><p>첫 기록장을 하나 만들어보세요.<br>그다음부터는 기록장을 여러 개 만들어 나눠서 사용할 수 있습니다.</p><button class="primary" onclick="openModal()">새 기록 시작하기 →</button></div></section><section class="share-note"><div class="share-note-label">SHARE YOUR JOURNAL</div><h2>기록장을 다른 사람과<br>공유할 수 있습니다.</h2><p>카드 왼쪽 아래의 공유 아이콘을 누르면<br>카카오톡으로 보내거나 기록장 링크를 복사할 수 있습니다.</p></section><section class="deleted-section" id="deletedSection" style="display:none"><h2>최근 삭제한 기록장</h2><p class="deleted-sub">삭제한 기록장은 7일 동안 보관되며, 그 안의 기록과 사진도 복원할 수 있습니다.</p><div class="deleted-list" id="deletedList"></div></section>
@@ -119,6 +119,9 @@ function render(){const custom=getCustom();const box=document.getElementById('jo
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 render();
 renderDeleted();
+<script>
+try{const d=JSON.parse(localStorage.getItem('lyt_my_info')||'null');if(d){if(d.name)document.getElementById('profileGreeting').textContent=d.name+'님, 오늘의 일상은 어땠나요?';if(d.description)document.getElementById('profileDescription').textContent=d.description;}}
+catch(e){}
 </script>
 </body>
 </html>
