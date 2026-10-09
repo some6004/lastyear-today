@@ -36,7 +36,7 @@
 <input id="imageUpload" type="file" accept="image/*" hidden onchange="handleUpload(event)">
 <div class="preview" id="preview"></div>
 </div>
-<div class="dialog-actions" id="editActions"><button onclick="closeModal()">취소</button><div><button class="delete-btn" onclick="startDelete()">기록장 삭제</button> <button class="create" onclick="saveJournal()">저장하기 →</button></div></div><div class="delete-warning" id="deleteWarning"></div>
+<div class="dialog-actions" id="editActions"><button onclick="closeModal()">취소</button><div><button class="delete-btn" id="deleteJournalBtn" onclick="startDelete()">기록장 삭제</button> <button class="create" onclick="saveJournal()">저장하기 →</button></div></div><div class="delete-warning" id="deleteWarning"></div>
 </div></div>
 
 <script>
@@ -61,7 +61,7 @@ function saveDeleted(a){localStorage.setItem(deletedKey,JSON.stringify(a))}
 function purgeDeleted(){const now=Date.now();const kept=getDeleted().filter(j=>j.expiresAt>now);if(kept.length!==getDeleted().length)saveDeleted(kept);return kept}
 function formatDate(ts){const d=new Date(ts);return d.getFullYear()+'. '+String(d.getMonth()+1).padStart(2,'0')+'. '+String(d.getDate()).padStart(2,'0')}
 function daysLeft(ts){return Math.max(0,Math.ceil((ts-Date.now())/DAY))}
-function openModal(index=-1){editIndex=index;const j=index>=0?getCustom()[index]:{name:'',desc:'',image:''};document.getElementById('modalTitle').textContent=index>=0?'기록장 수정하기':'새 기록장 만들기';document.getElementById('journalName').value=j.name||'';document.getElementById('journalDesc').value=j.desc||'';selectedImage=j.image||'';renderImages();document.getElementById('modal').classList.add('show');setTimeout(()=>document.getElementById('journalName').focus(),50)}
+function openModal(index=-1){editIndex=index;const j=index>=0?getCustom()[index]:{name:'',desc:'',image:''};document.getElementById('modalTitle').textContent=index>=0?'기록장 수정하기':'새 기록장 만들기';document.getElementById('deleteJournalBtn').style.display=index>=0?'inline-block':'none';document.getElementById('journalName').value=j.name||'';document.getElementById('journalDesc').value=j.desc||'';selectedImage=j.image||'';renderImages();document.getElementById('modal').classList.add('show');setTimeout(()=>document.getElementById('journalName').focus(),50)}
 function closeModal(){document.getElementById('modal').classList.remove('show')}
 function renderImages(){const box=document.getElementById('imageOptions');box.innerHTML=samples.map((url,i)=>'<button type="button" class="sample '+(selectedImage===url?'selected':'')+'" style="background-image:url('+url+')" onclick="selectSample('+i+')"></button>').join('');const p=document.getElementById('preview');if(selectedImage&&!samples.includes(selectedImage)){p.style.backgroundImage='url('+selectedImage+')';p.classList.add('show')}else{p.classList.remove('show');p.style.backgroundImage=''}}
 function selectSample(i){selectedImage=samples[i];renderImages()}
