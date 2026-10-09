@@ -33,4 +33,5 @@
 <script>
 const buttons=document.querySelectorAll('.filter'),cards=document.querySelectorAll('.card'),empty=document.getElementById('empty');
 buttons.forEach(b=>b.addEventListener('click',()=>{buttons.forEach(x=>x.classList.remove('active'));b.classList.add('active');const f=b.dataset.filter;let n=0;cards.forEach(c=>{const show=f==='all'||c.dataset.cat===f;c.style.display=show?'block':'none';if(show)n++});empty.style.display=n?'none':'block'}));
-</script></body></html>
+</script><!-- Vercel automatic deployment check: 2026-10-09 -->
+</body></html>
