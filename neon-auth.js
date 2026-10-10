@@ -15,6 +15,7 @@
     auth: {
       async getSession() { return (await clientPromise).getSession(); },
       async signInWithPassword(credentials) { return (await clientPromise).signInWithPassword(credentials); },
+      async signInWithOAuth(options) { return (await clientPromise).signInWithOAuth(options); },
       async signUp(credentials) { return (await clientPromise).signUp(credentials); },
       async signOut() { return (await clientPromise).signOut(); },
       async getUser() { return (await clientPromise).getUser(); },
