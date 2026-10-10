@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f3f0e9"><title>내 기록 — 작년, 오늘</title>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f3f0e9"><title>시연 기록 — 작년, 오늘</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--paper:#f3f0e9;--ink:#24231f;--soft:#77736b;--faint:#aaa59c;--rule:#d7d2c9}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}.page{max-width:1180px;margin:auto;padding:0 34px}.top{height:92px;border-bottom:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between}.logo{font:400 30px/1 "Noto Serif KR",serif;letter-spacing:-.09em;text-decoration:none;color:var(--ink)}.logo span{display:inline-block}.logo span:nth-child(1){color:#c99da5;transform:translateY(1px)}.logo span:nth-child(2){color:#9eaf98;transform:translateY(-1px)}.logo span:nth-child(3){color:#c4af91;transform:translateY(2px)}.logo span:nth-child(4){color:#a89bb2;transform:translateY(0)}.nav{display:flex;gap:25px}.nav a{font-size:13px;color:var(--soft);text-decoration:none}.main{padding:74px 0 120px}.intro{display:flex;justify-content:space-between;align-items:end;margin-bottom:48px}.eyebrow{font-size:11px;letter-spacing:.18em;color:var(--soft);margin-bottom:20px}.title{font:400 clamp(48px,6vw,76px)/1.05 "Noto Serif KR",serif;letter-spacing:-.075em;margin:0}.intro p{max-width:360px;color:var(--soft);font-size:14px;line-height:1.8;margin:0}.calendar-head{border-top:1px solid var(--ink);padding:20px 0 18px;display:flex;justify-content:space-between;align-items:center}.years{display:flex;gap:15px;align-items:center;margin-top:7px}.year{border:0;background:none;padding:0;color:#aaa59c;font:400 11px Pretendard;cursor:pointer}.year.active{color:var(--ink);font-weight:500}.year:hover{color:var(--ink)}.month{font:400 31px "Noto Serif KR",serif;letter-spacing:-.06em}.month small{font:400 13px Pretendard;color:var(--soft);margin-left:9px}.arrows{display:flex;gap:18px}.arrow{border:0;background:none;color:var(--soft);font-size:13px;cursor:pointer;padding:7px}.arrow:hover{color:var(--ink)}.week{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}.week div{padding:13px 9px;font-size:11px;color:var(--faint)}.week div:first-child{color:#b58e94}.week div:last-child{color:#98a493}.grid{display:grid;grid-template-columns:repeat(7,1fr);border-left:1px solid var(--rule)}.day{min-height:145px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:10px;position:relative;cursor:pointer;overflow:hidden}.day:hover{background:#eeebe4}.day.empty{cursor:default}.num{font-size:11px;color:var(--soft);position:relative;z-index:2}.day.today .num{color:var(--ink);font-weight:600}.thumb{position:absolute;inset:32px 8px 8px;background-size:cover;background-position:center;filter:saturate(.82);transition:filter .2s}.day:hover .thumb{filter:saturate(1)}.thumb:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.3))}.mark{position:absolute;right:9px;top:12px;width:5px;height:5px;border-radius:50%;background:#c4af91}.detail{margin-top:70px;border-top:1px solid var(--ink);padding-top:25px;display:grid;grid-template-columns:180px 1fr;gap:55px}.detail-date{color:var(--soft);font-size:12px}.detail-title{font:400 29px "Noto Serif KR",serif;margin:0 0 13px;letter-spacing:-.05em}.detail-text{font:400 16px/1.9 "Noto Serif KR",serif;color:#555149;max-width:700px}.detail-image{width:100%;max-width:460px;height:240px;object-fit:cover;margin-top:25px;display:none}.empty-note{color:var(--faint);font-size:13px}.loading-panel{display:flex;align-items:center;gap:13px;padding:24px 18px;margin:0 0 22px;background:rgba(255,253,248,.7);border:1px solid var(--rule);color:var(--soft);font-size:13px;line-height:1.7}.loading-spinner{width:20px;height:20px;border:2px solid #d8d2c8;border-top-color:#77736b;border-radius:50%;animation:records-spin .8s linear infinite;flex:none}@keyframes records-spin{to{transform:rotate(360deg)}}.loading-panel[hidden]{display:none}.footer{border-top:1px solid var(--rule);padding:28px 0 45px;color:var(--faint);font-size:11px;display:flex;justify-content:space-between}
@@ -63,29 +63,21 @@ function showRecord(k,r){
 function changeMonth(n){view=new Date(view.getFullYear(),view.getMonth()+n,1);render()}
 async function loadRecords(){
  try{
-  const client=window.LYT_AUTH_CLIENT;
-  const {data:{session},error}=await client.auth.getSession();
-  if(error)throw error;
-  if(!session?.access_token){
-   statusEl.innerHTML='내 기록을 보려면 <a href="login.html" style="color:inherit;text-decoration:underline">로그인</a>해 주세요. 기록은 로그인한 본인에게만 표시됩니다.';
-   loadingPanel.hidden=true;
-   render();return;
-  }
   loadingPanel.hidden=false;
-  statusEl.textContent='나의 기록을 불러오고 있어요. 잠시만 기다려 주세요.';
-  const response=await fetch('/api/entries',{headers:{Authorization:'Bearer '+session.access_token},cache:'no-store'});
+  statusEl.textContent='시연 기록을 불러오고 있어요. 잠시만 기다려 주세요.';
+  const response=await fetch('/api/demo-entries',{cache:'no-store'});
   const result=await response.json();
   if(!response.ok)throw new Error(result.error||'기록을 불러오지 못했습니다.');
   (result.entries||[]).forEach(r=>{
    const k=String(r.entry_date).slice(0,10);
    if(!records[k])records[k]=r;
   });
-  statusEl.textContent=Object.keys(records).length?'저장된 기록 '+Object.keys(records).length+'개':'아직 저장된 기록이 없습니다. 기록하기에서 첫 기록을 남겨보세요.';
+  statusEl.textContent=Object.keys(records).length?'공용 시연 기록 '+Object.keys(records).length+'개':'아직 저장된 시연 기록이 없습니다. 기록하기에서 첫 기록을 남겨보세요.';
   loadingPanel.hidden=true;
   render();
  }catch(e){
-  console.error('records load failed',e);
-  statusEl.textContent='기록을 불러오지 못했습니다. 로그인 상태와 서버 연결을 확인해 주세요.';
+  console.error('demo records load failed',e);
+  statusEl.textContent='시연 기록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.';
   loadingPanel.hidden=true;
   render();
  }
