@@ -29,6 +29,7 @@ textarea{min-height:135px;font-size:19px}.ask-bottom{align-items:end}.example-gr
 .footer{display:block}.footer span{display:block;margin-top:8px}
 }
 </style>
+<link rel="stylesheet" href="site-common.css">
 </head>
 <body>
 <div class="page">
@@ -57,5 +58,6 @@ function fill(text){q.value=text;q.focus();window.scrollTo({top:q.getBoundingCli
 function ask(){const text=q.value.trim();if(!text){q.focus();return}statusEl.textContent='AI 연결 준비 중입니다.';answer.classList.add('show');answerText.textContent='현재는 화면과 질문 흐름을 먼저 준비한 데모입니다. AI가 연결되면 내 기록을 검색하고 여러 기록을 연결해 이 질문에 대한 답을 보여드릴 수 있습니다.'}
 q.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter')ask()});
 </script>
+<script src="site-common.js"></script>
 </body>
 </html>
