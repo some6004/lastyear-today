@@ -24,12 +24,15 @@
   if(!response.ok)throw new Error(result.error||'기록을 불러오지 못했어요.');
   const r=result.entry;
   function fillRecord(prefix,record,label){
-    document.getElementById(prefix+'Date').textContent=String(record.entry_date).slice(0,10).replaceAll('-','. ');
-    document.getElementById(prefix+'Title').textContent=record.title||label;
-    document.getElementById(prefix+'Content').textContent=record.content||'';
+    const dateEl=document.getElementById(prefix+'Date');
+    if(dateEl)dateEl.textContent=String(record.entry_date).slice(0,10).replaceAll('-','. ');
+    const titleEl=document.getElementById(prefix+'Title');
+    if(titleEl)titleEl.textContent=record.title||label;
+    const contentEl=document.getElementById(prefix+'Content');
+    if(contentEl)contentEl.textContent=record.content||'';
     const vis=document.getElementById(prefix+'Visibility');if(vis)vis.textContent=record.visibility==='public'?'공개 기록':'나만 볼 수 있는 기록';
     const meta=record.metadata||{},src=meta.imageDataUrl||meta.imageUrl||'';
-    const img=document.getElementById(prefix+'Photo');if(src){img.src=src;img.hidden=false;}
+    const img=document.getElementById(prefix+'Photo');if(img&&src){img.src=src;img.hidden=false;}
   }
   fillRecord('',r,'오늘의 기록');
   const dateText=String(r.entry_date).slice(0,10),dt=new Date(dateText+'T12:00:00');
