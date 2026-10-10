@@ -14,14 +14,16 @@
       }
     });
   }
+  function brandMarkup(){return '<span class="logo-char">작</span><span class="logo-char">년</span><span class="logo-char">,</span><span class="logo-char"> </span><span class="logo-char">오</span><span class="logo-char">늘</span>';}
+  function normalizeFooterLogo(){var node=document.querySelector('.lyt-footer-logo');if(node){node.innerHTML=brandMarkup();node.setAttribute('aria-label','작년, 오늘');}}
   function renderFooter(){
     if(document.querySelector('meta[name="lyt-no-footer"]'))return;
     document.querySelectorAll('footer').forEach(function(old){old.remove()});
     var footer=document.createElement('footer');
     footer.className='lyt-footer';
-    footer.innerHTML='<div class="lyt-footer-brand"><a class="lyt-footer-logo" href="index.html">작년, 오늘</a><span class="lyt-footer-tagline">오늘의 기록이 내일의 추억이 됩니다.</span></div><div class="lyt-footer-center"><nav class="lyt-footer-links" aria-label="하단 메뉴"><a href="index.html">서비스 소개</a><a href="privacy.html">개인정보 처리방침</a><a href="support.html">1:1 문의</a></nav><div class="lyt-footer-copy">© 2026 작년, 오늘. All rights reserved.</div></div>';
+    footer.innerHTML='<div class="lyt-footer-brand"><a class="lyt-footer-logo" href="index.html" aria-label="작년, 오늘">' + brandMarkup() + '</a><span class="lyt-footer-tagline">오늘의 기록이 내일의 추억이 됩니다.</span></div><div class="lyt-footer-center"><nav class="lyt-footer-links" aria-label="하단 메뉴"><a href="index.html">서비스 소개</a><a href="privacy.html">개인정보 처리방침</a><a href="support.html">1:1 문의</a></nav><div class="lyt-footer-copy">© 2026 작년, 오늘. All rights reserved.</div></div>';
     document.body.appendChild(footer);
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){normalizeLogo();renderFooter()});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){normalizeLogo();renderFooter();normalizeFooterLogo()});
   else{normalizeLogo();renderFooter()}
 })();
