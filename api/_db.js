@@ -33,8 +33,16 @@ async function requireUser(req) {
     const { payload } = await joseModule.jwtVerify(token, jwks);
     const id = typeof payload.sub === 'string' ? payload.sub : '';
     if (!id) throw new Error('Missing subject');
+    const db = getPool();
+    const account = await db.query("SELECT withdrawal_status FROM public.lyt_profiles WHERE user_id=$1 LIMIT 1", [id]);
+    if (account.rows[0] && account.rows[0].withdrawal_status === 'pending') {
+      const error = new Error('회원 탈퇴가 접수된 계정입니다. 탈퇴 철회가 필요하면 1:1 문의로 관리자에게 요청해 주세요.');
+      error.status = 403;
+      throw error;
+    }
     return { id, email: typeof payload.email === 'string' ? payload.email : undefined };
   } catch (cause) {
+    if (cause && cause.status === 403) throw cause;
     const error = new Error('로그인 세션이 만료되었습니다. 다시 로그인해 주세요.');
     error.status = 401;
     throw error;
