@@ -13,8 +13,7 @@
 <div class="week"><div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div></div><div class="grid" id="calendar"></div></section>
 <section class="detail" id="detail"><div class="detail-date" id="detailDate">날짜를 선택하세요</div><div><h2 class="detail-title" id="detailTitle">기록이 있는 날을 눌러보세요.</h2><div class="detail-text" id="detailText">달력의 썸네일을 누르면 그날의 기록이 아래에 나타납니다.</div><img class="detail-image" id="detailImage" alt="선택한 기록의 이미지"></div></section>
 </main><footer class="footer"><span>© 2026 작년, 오늘</span><span>나의 모든 기록을 기억하는 개인 AI 아카이브</span></footer></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase-config.js"></script>
+<script src="neon-auth.js"></script>
 <script>
 const records = Object.create(null);
 let view = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
@@ -62,7 +61,7 @@ function showRecord(k,r){
 function changeMonth(n){view=new Date(view.getFullYear(),view.getMonth()+n,1);render()}
 async function loadRecords(){
  try{
-  const client=window.supabase.createClient(window.LYT_SUPABASE_URL,window.LYT_SUPABASE_KEY);
+  const client=window.LYT_AUTH_CLIENT;
   const {data:{session},error}=await client.auth.getSession();
   if(error)throw error;
   if(!session?.access_token){
