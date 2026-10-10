@@ -17,21 +17,21 @@ function cookieValue(req) {
   return item ? decodeURIComponent(item.slice(COOKIE.length + 1)) : '';
 }
 function isAdmin(req) {
-  if (!process.env.ADMIN_PASSWORD || !process.env.ADMIN_SESSION_SECRET) return false;
+  if (!process.env.ADMIN_USERNAME || !process.env.ADMIN_PASSWORD || !process.env.ADMIN_SESSION_SECRET) return false;
   const token = cookieValue(req);
   const [expires, mac] = token.split('.');
-  if (!expires || !mac || !/^\d+$/.test(expires) || Number(expires) < Date.now()) return false;
+  if (!expires || !mac || !/^\\d+$/.test(expires) || Number(expires) < Date.now()) return false;
   return safeEqual(mac, sign(expires));
 }
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   try {
     if (req.method === 'POST' && req.body && req.body.action === 'login') {
-      if (!process.env.ADMIN_PASSWORD || !process.env.ADMIN_SESSION_SECRET) {
-        return res.status(503).json({ error: '관리자 비밀번호 설정이 필요합니다. Vercel 환경변수를 확인해 주세요.' });
+      if (!process.env.ADMIN_USERNAME || !process.env.ADMIN_PASSWORD || !process.env.ADMIN_SESSION_SECRET) {
+        return res.status(503).json({ error: '관리자 계정 설정이 필요합니다. Vercel 환경변수 ADMIN_USERNAME, ADMIN_PASSWORD, ADMIN_SESSION_SECRET을 확인해 주세요.' });
       }
-      if (!safeEqual(req.body.password, process.env.ADMIN_PASSWORD)) {
-        return res.status(401).json({ error: '관리자 비밀번호가 올바르지 않습니다.' });
+      if (!safeEqual(req.body.username, process.env.ADMIN_USERNAME) || !safeEqual(req.body.password, process.env.ADMIN_PASSWORD)) {
+        return res.status(401).json({ error: '관리자 아이디 또는 비밀번호가 올바르지 않습니다.' });
       }
       const expires = String(Date.now() + MAX_AGE);
       const token = expires + '.' + sign(expires);
