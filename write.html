@@ -25,7 +25,7 @@
 <a class="mobile-memory-preview" href="#memory"><div class="mobile-memory-thumb" id="mobileMemoryThumb"></div><div class="mobile-memory-copy"><div class="mobile-memory-kicker">ONE YEAR AGO</div><strong>작년, 오늘</strong><span id="mobileMemoryDate">2025. 10. 09</span><p id="mobileMemoryText">아침부터 현장에 나가 정신없이 하루를 보냈다.</p></div><span class="mobile-memory-arrow">↓</span></a>
 <section class="editor">
 <div><input class="date-select" id="date" type="date" aria-label="기록 날짜"></div>
-<div class="write-layout"><div class="writing-area"><div class="keyword-writer"><div class="keyword-label"><span>키워드로 글쓰기</span><small>단어 몇 개로 초안 만들기</small></div><input id="writingKeywords" class="keyword-input" type="text" maxlength="240" placeholder="예: 아이 첫걸음, 공원 산책, 뿌듯했던 하루"><div class="keyword-options"><label class="keyword-select-label" for="writingContext">기록의 성격</label><select id="writingContext" class="keyword-length" aria-label="기록의 성격"><option value="일상">일상</option><option value="육아">육아</option><option value="여행">여행</option><option value="업무">업무</option><option value="가족">가족</option><option value="연애·관계">연애·관계</option><option value="건강·운동">건강·운동</option><option value="취미">취미</option><option value="기타">기타</option></select></div><div class="keyword-tone-wrap"><div class="keyword-select-label">문체</div><div class="keyword-tones" id="writingTones"><button type="button" class="tone-button selected" data-tone="담백하게">담백하게</button><button type="button" class="tone-button" data-tone="감성적으로">감성적으로</button><button type="button" class="tone-button" data-tone="밝고 유쾌하게">밝고 유쾌하게</button><button type="button" class="tone-button" data-tone="딱딱한 업무톤">딱딱한 업무톤</button><button type="button" class="tone-button" data-tone="다정하게">다정하게</button><button type="button" class="tone-button" data-tone="유머러스하게">유머러스하게</button></div></div><div class="keyword-tools"><span id="keywordUsageCount" class="keyword-usage">오늘 남은 횟수 확인 중…</span><button id="generateDraftBtn" class="keyword-generate" type="button" onclick="generateKeywordDraft()">문장 생성</button></div><div id="keywordDraftStatus" style="font-size:11px;color:var(--faint);margin-top:9px" aria-live="polite">키워드를 3~4개 적고 문장 생성을 눌러 주세요. 하루 10회까지 이용할 수 있어요.</div><div id="keywordDraftPreview" class="keyword-preview"></div><div id="keywordDraftActions" class="keyword-actions" style="display:none"><button type="button" onclick="useKeywordDraft(false)">글 뒤에 붙이기</button><button type="button" onclick="useKeywordDraft(true)">본문으로 사용</button></div></div><textarea id="content" placeholder="오늘의 하루를 천천히 적어보세요.
+<div class="write-layout"><div class="writing-area"><div class="keyword-writer"><div class="keyword-label"><span>키워드로 글쓰기</span><small>단어 몇 개로 초안 만들기</small></div><input id="writingKeywords" class="keyword-input" type="text" maxlength="240" placeholder="예: 아이 첫걸음, 공원 산책, 뿌듯했던 하루"><div class="keyword-options"><label class="keyword-select-label" for="writingContext">기록의 성격</label><select id="writingContext" class="keyword-length" aria-label="기록의 성격"><option value="일상">일상</option><option value="육아">육아</option><option value="여행">여행</option><option value="업무">업무</option><option value="가족">가족</option><option value="연애·관계">연애·관계</option><option value="건강·운동">건강·운동</option><option value="취미">취미</option><option value="기타">기타</option></select></div><div class="keyword-tone-wrap"><div class="keyword-select-label">문체</div><div class="keyword-tones" id="writingTones"><button type="button" class="tone-button selected" data-tone="담백하게">담백하게</button><button type="button" class="tone-button" data-tone="감성적으로">감성적으로</button><button type="button" class="tone-button" data-tone="밝고 유쾌하게">밝고 유쾌하게</button><button type="button" class="tone-button" data-tone="딱딱한 업무톤">딱딱한 업무톤</button><button type="button" class="tone-button" data-tone="다정하게">다정하게</button><button type="button" class="tone-button" data-tone="유머러스하게">유머러스하게</button></div></div><div class="keyword-tools"><span id="keywordUsageCount" class="keyword-usage">무료 · 무제한 생성</span><button id="generateDraftBtn" class="keyword-generate" type="button" onclick="generateKeywordDraft()">문장 생성</button></div><div id="keywordDraftStatus" style="font-size:11px;color:var(--faint);margin-top:9px" aria-live="polite">키워드를 3~4개 적고 문장 생성을 눌러 주세요. 하루 10회까지 이용할 수 있어요.</div><div id="keywordDraftPreview" class="keyword-preview"></div><div id="keywordDraftActions" class="keyword-actions" style="display:none"><button type="button" onclick="useKeywordDraft(false)">글 뒤에 붙이기</button><button type="button" onclick="useKeywordDraft(true)">본문으로 사용</button></div></div><textarea id="content" placeholder="오늘의 하루를 천천히 적어보세요.
 
 무슨 일이 있었는지,
 어떤 생각을 했는지,
@@ -93,34 +93,65 @@ function swipeEnd(x,y){if(!dragging)return;dragging=false;swipe.classList.remove
 swipe.addEventListener('touchstart',e=>swipeStart(e.touches[0].clientX,e.touches[0].clientY),{passive:true});swipe.addEventListener('touchmove',e=>swipeMove(e.touches[0].clientX),{passive:true});swipe.addEventListener('touchend',e=>{const t=e.changedTouches[0];swipeEnd(t.clientX,t.clientY)},{passive:true});swipe.addEventListener('mousedown',e=>swipeStart(e.clientX,e.clientY));window.addEventListener('mousemove',e=>{if(dragging)swipeMove(e.clientX)});window.addEventListener('mouseup',e=>{if(dragging)swipeEnd(e.clientX,e.clientY)});
 function updatePrivacyStatus(){const pub=document.getElementById('public').checked;document.getElementById('status').textContent=pub?'공개 기록으로 저장합니다.':'당신만의 비공개 기록으로 남습니다.'}
 function showToast(message){const t=document.getElementById('toast');t.textContent=message;t.classList.add('show');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.classList.remove('show'),1800)}
-let keywordDraftText='';let keywordDraftRequest=0;let selectedWritingTone='담백하게';let keywordRemaining=10;
+let keywordDraftText='';let selectedWritingTone='담백하게';
 document.querySelectorAll('#writingTones .tone-button').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('#writingTones .tone-button').forEach(item=>item.classList.toggle('selected',item===button));selectedWritingTone=button.dataset.tone;}));
-async function refreshKeywordUsage(){
- try{const sessionResult=await writeAuthClient.auth.getSession();const token=sessionResult?.data?.session?.access_token;if(!token){document.getElementById('keywordUsageCount').textContent='로그인 후 이용할 수 있어요';return}
- const response=await fetch('/api/assist-writing',{headers:{Authorization:'Bearer '+token}});const result=await response.json();if(!response.ok)throw new Error(result.error||'횟수 확인 실패');keywordRemaining=result.remaining;document.getElementById('keywordUsageCount').textContent='오늘 '+result.used+'/10회 사용 · '+result.remaining+'회 남음';document.getElementById('generateDraftBtn').disabled=result.remaining<=0;
- }catch(e){document.getElementById('keywordUsageCount').textContent='로그인 후 이용할 수 있어요'}
+function makeLocalDraft(rawKeywords, context, tone){
+ const words=rawKeywords.split(/[,，、;；\n]+/).map(x=>x.trim()).filter(Boolean).slice(0,12);
+ if(!words.length)return '';
+ const joined=words.join(', ');
+ const hasFeeling=/(기쁨|행복|뿌듯|감사|설렘|걱정|속상|슬픔|힘들|즐거움|재미|감동|아쉬움|긴장|후회|만족|평온)/.test(joined);
+ const hasPlace=/(공원|바다|여행|집|회사|학교|현장|카페|식당|병원|산책|캠핑|해외|제주|산|시장)/.test(joined);
+ const hasAction=/(만났|먹었|다녀왔|갔|왔|시작|마쳤|완성|배웠|만들|구경|산책|운동|공부|출근|퇴근|여행|정리|구입|샀|축하|대화|촬영|방문)/.test(joined);
+ const contextOpeners={
+  '육아':'아이와 함께한 순간을 돌아보니','여행':'오늘의 여행을 떠올리니','업무':'오늘 업무를 정리해 보니','가족':'가족과 함께한 시간을 돌아보니','연애·관계':'함께 나눈 시간을 돌아보니','건강·운동':'오늘의 건강과 운동을 돌아보니','취미':'좋아하는 일에 집중한 오늘은','일상':'오늘 하루를 돌아보니','기타':'오늘의 기록을 돌아보니'
+ };
+ const opener=contextOpeners[context]||contextOpeners['일상'];
+ let first='';
+ if(context==='업무') first='오늘은 '+joined+' 관련 업무를 중심으로 하루를 보냈다.';
+ else if(context==='육아') first='오늘은 '+joined+'과 관련된 순간들이 기억에 남는다.';
+ else if(context==='여행') first='오늘은 '+joined+'이(가) 여행의 기억으로 남았다.';
+ else if(context==='가족') first='오늘은 '+joined+'과 함께한 시간이 마음에 남았다.';
+ else first='오늘은 '+joined+'이(가) 기억에 남는 하루였다.';
+ let second=hasFeeling?'돌아보니 그 순간의 감정까지 오래 기억하고 싶은 날이다.':hasPlace?'익숙하거나 새로운 풍경 속에서 잠시 멈춰 하루를 돌아볼 수 있었다.':hasAction?'크고 작은 일을 하나씩 겪으며 하루를 채워 갔다.':'이 키워드들을 기록해 두니 오늘의 장면이 조금 더 선명해진다.';
+ const endings={
+  '담백하게':['하루의 흐름을 차분히 정리해 두었다.','이 순간을 오늘의 기록으로 남겨 둔다.'],
+  '감성적으로':['평범한 순간도 시간이 지나면 소중한 기억이 될 것 같다.','오늘의 마음과 장면을 오래 간직하고 싶다.'],
+  '밝고 유쾌하게':['이런 날도 있어야 하루가 더 재미있는 법이다.','덕분에 오늘도 나름 알찬 하루를 보냈다.'],
+  '딱딱한 업무톤':['관련 내용을 기록했으며, 추후 확인할 수 있도록 정리했다.','오늘 진행한 사항을 기록으로 남겼다.'],
+  '다정하게':['이런 순간들을 하나씩 모아 두고 싶다.','오늘도 수고한 나에게 작은 칭찬을 건네고 싶다.'],
+  '유머러스하게':['돌아보면 오늘도 나름 이야깃거리가 생겼다.','언젠가 이 기록을 읽으며 웃을지도 모르겠다.']
+ };
+ const endLine=(endings[tone]||endings['담백하게'])[words.length%2];
+ if(words.length===1) first='오늘은 '+words[0]+'이(가) 유난히 기억에 남았다.';
+ if(words.length>=3) second=hasFeeling?'여러 순간이 이어지며 마음에 다양한 감정이 남았다.':hasPlace?'장소와 장면이 어우러져 오늘만의 기억이 만들어졌다.':'서로 이어진 순간들을 이렇게 기록으로 남겨 둔다.';
+ if(tone==='딱딱한 업무톤'){first= context==='업무'?'금일 '+joined+' 관련 내용을 확인하고 기록했다.':'금일 '+joined+' 관련 사항을 기록했다.';second='향후 참고할 수 있도록 주요 내용을 정리했다.';}
+ else if(tone==='감성적으로'){first='오늘은 '+joined+'이(가) 마음에 오래 머물렀다.';second=hasFeeling?'그때 느꼈던 마음까지 잊지 않도록 이 순간을 기록해 둔다.':'지나고 나면 사소해 보일 순간도 오늘의 나에게는 의미가 있다.';}
+ else if(tone==='밝고 유쾌하게'){first='오늘의 키워드는 '+joined+'!';second='이런저런 순간이 모여 제법 괜찮은 하루가 완성됐다.';}
+ else if(tone==='다정하게'){first='오늘은 '+joined+'과 관련된 순간을 마음에 담아 두었다.';second='하루를 잘 보내느라 애쓴 나에게도 따뜻한 마음을 건네고 싶다.';}
+ else if(tone==='유머러스하게'){first='오늘을 한마디로 정리하면 '+joined+'이다.';second='하루가 끝나고 보니 이것도 꽤 괜찮은 에피소드가 될 것 같다.';}
+ if(words.length<=2)return first+' '+endLine;
+ return first+' '+second;
 }
-async function generateKeywordDraft(){
- const keywords=document.getElementById('writingKeywords').value.trim();const status=document.getElementById('keywordDraftStatus'),preview=document.getElementById('keywordDraftPreview'),btn=document.getElementById('generateDraftBtn');
- if(keywords.length<2){status.textContent='키워드를 2자 이상 입력해 주세요.';return}
- if(keywordRemaining<=0){status.textContent='오늘 사용할 수 있는 10회를 모두 사용했어요. 내일 다시 이용해 주세요.';return}
- const request=++keywordDraftRequest;btn.disabled=true;status.textContent='키워드를 바탕으로 문장을 만들고 있어요…';preview.classList.remove('show');document.getElementById('keywordDraftActions').style.display='none';
+function generateKeywordDraft(){
+ const keywords=document.getElementById('writingKeywords').value.trim();
+ const status=document.getElementById('keywordDraftStatus'),preview=document.getElementById('keywordDraftPreview'),btn=document.getElementById('generateDraftBtn');
+ if(keywords.length<2){status.textContent='키워드를 두 글자 이상 입력해 주세요.';return}
+ const words=keywords.split(/[,，、;；\n]+/).map(x=>x.trim()).filter(Boolean);
+ if(words.length<2){status.textContent='키워드를 쉼표로 구분해 2개 이상 입력하면 더 자연스러워요. 한 개만 입력해도 생성할 수 있어요.';}
+ btn.disabled=true;status.textContent='입력한 키워드로 문장을 조합하고 있어요…';preview.classList.remove('show');document.getElementById('keywordDraftActions').style.display='none';
  try{
-  const sessionResult=await writeAuthClient.auth.getSession();const token=sessionResult?.data?.session?.access_token;if(!token)throw new Error('로그인 후 이용해 주세요.');
-  const response=await fetch('/api/assist-writing',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({keywords,context:document.getElementById('writingContext').value,tone:selectedWritingTone,journal:selectedJournal||''})});
-  const result=await response.json();if(!response.ok){if(typeof result.remaining==='number'){keywordRemaining=result.remaining;document.getElementById('keywordUsageCount').textContent='오늘 '+result.used+'/10회 사용 · '+result.remaining+'회 남음'}throw new Error(result.error||'문장을 만들지 못했어요.')}
-  if(request!==keywordDraftRequest)return;keywordDraftText=String(result.text||'').trim();if(!keywordDraftText)throw new Error('생성된 문장이 비어 있어요.');
-  if(typeof result.remaining==='number'){keywordRemaining=result.remaining;document.getElementById('keywordUsageCount').textContent='오늘 '+result.used+'/10회 사용 · '+result.remaining+'회 남음'}
-  preview.textContent=keywordDraftText;preview.classList.add('show');document.getElementById('keywordDraftActions').style.display='flex';status.textContent='문장이 준비됐어요. 마음에 들면 본문에 넣어 주세요.';
- }catch(e){if(request===keywordDraftRequest)status.textContent=e.message||'문장을 만들지 못했어요.'}
- finally{if(request===keywordDraftRequest)btn.disabled=keywordRemaining<=0}
+  keywordDraftText=makeLocalDraft(keywords,document.getElementById('writingContext').value,selectedWritingTone);
+  if(!keywordDraftText)throw new Error('키워드를 입력해 주세요.');
+  preview.textContent=keywordDraftText;preview.classList.add('show');document.getElementById('keywordDraftActions').style.display='flex';
+  status.textContent='문장이 준비됐어요. 무료로 횟수 제한 없이 만들 수 있어요.';
+ }catch(e){status.textContent=e.message||'문장을 만들지 못했어요.'}
+ finally{btn.disabled=false}
 }
-refreshKeywordUsage();
 function useKeywordDraft(replace){
  const area=document.getElementById('content');if(!keywordDraftText)return;
  if(replace||!area.value.trim())area.value=keywordDraftText;
  else area.value=area.value.trimEnd()+'\n\n'+keywordDraftText;
- area.dispatchEvent(new Event('input',{bubbles:true}));area.focus();document.getElementById('status').textContent='AI 초안을 본문에 넣었어요. 저장 전에 자유롭게 수정할 수 있어요.';
+ area.dispatchEvent(new Event('input',{bubbles:true}));area.focus();document.getElementById('status').textContent='생성한 문장을 본문에 넣었어요. 저장 전에 자유롭게 수정할 수 있어요.';
 }
 async function saveRecord(){
  const content=document.getElementById('content').value.trim();
