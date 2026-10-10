@@ -35,7 +35,7 @@ module.exports = async function handler(req, res) {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'gpt-4.1-nano',
+        model: 'gpt-5-nano',
         temperature: 0.75,
         max_tokens: 450,
         messages: [
