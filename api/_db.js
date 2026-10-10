@@ -40,6 +40,7 @@ async function requireUser(req) {
       error.status = 403;
       throw error;
     }
+    await db.query("INSERT INTO public.lyt_user_activity(user_id,last_seen_at,total_seconds,updated_at) VALUES($1,now(),0,now()) ON CONFLICT(user_id) DO UPDATE SET total_seconds=public.lyt_user_activity.total_seconds + LEAST(300,GREATEST(0,FLOOR(EXTRACT(EPOCH FROM (now()-public.lyt_user_activity.last_seen_at)))::bigint)), last_seen_at=now(),updated_at=now()", [id]);
     return { id, email: typeof payload.email === 'string' ? payload.email : undefined };
   } catch (cause) {
     if (cause && cause.status === 403) throw cause;
