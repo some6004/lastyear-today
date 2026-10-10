@@ -34,7 +34,10 @@ module.exports = async function handler(req, res) {
           if (!title) continue;
           const id = UUID.test(String(item.id || '')) ? item.id : null;
           const description = String(item.desc || item.description || '').slice(0, 2000);
-          const image = typeof item.image === 'string' && item.image.startsWith('https://') ? item.image : null;
+          const rawImage = typeof item.image === 'string' ? item.image : '';
+          const image = /^https:\/\//i.test(rawImage) && rawImage.length <= 2000
+            ? rawImage
+            : (/^data:image\/(jpeg|png|webp);base64,/.test(rawImage) && rawImage.length <= 3500000 ? rawImage : null);
           const visibility = ['private', 'public', 'unlisted'].includes(item.visibility) ? item.visibility : 'private';
           const result = await client.query(
             `INSERT INTO public.lyt_journals (id, owner_id, title, description, cover_image_key, visibility)
