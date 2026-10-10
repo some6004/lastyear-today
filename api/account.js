@@ -6,7 +6,12 @@ module.exports=async function handler(req,res){
   if(req.method==='POST'&&req.body?.action==='withdraw'){
    if(String(req.body.confirm||'')!=='탈퇴 신청')return res.status(400).json({error:'탈퇴 신청 확인 문구가 올바르지 않습니다.'});
    const r=await db.query("UPDATE public.lyt_profiles SET withdrawal_status='pending',withdrawal_requested_at=COALESCE(withdrawal_requested_at,now()),withdrawal_scheduled_at=COALESCE(withdrawal_scheduled_at,now()+interval '30 days'),updated_at=now() WHERE user_id=$1 RETURNING withdrawal_requested_at,withdrawal_scheduled_at",[user.id]);
-   if(!r.rows.length)return res.status(404).json({error:'회원 프로필을 찾을 수 없습니다.'});
+   if(!r.rows.length){
+    const email=String(user.email||'').trim().toLowerCase();
+    await db.query("INSERT INTO public.lyt_profiles(user_id,email,username,display_name,nickname,withdrawal_status,withdrawal_requested_at,withdrawal_scheduled_at,updated_at) VALUES($1,$2,$3,$4,$4,'pending',now(),now()+interval '30 days',now()) ON CONFLICT(user_id) DO UPDATE SET withdrawal_status='pending',withdrawal_requested_at=COALESCE(public.lyt_profiles.withdrawal_requested_at,now()),withdrawal_scheduled_at=COALESCE(public.lyt_profiles.withdrawal_scheduled_at,now()+interval '30 days'),updated_at=now()",[user.id,email||null,email?email.split('@')[0]:null,email?email.split('@')[0]:'회원']);
+    const fallback=await db.query("SELECT withdrawal_requested_at,withdrawal_scheduled_at FROM public.lyt_profiles WHERE user_id=$1",[user.id]);
+    return res.status(200).json({ok:true,...fallback.rows[0]});
+   }
    return res.status(200).json({ok:true,...r.rows[0]});
   }
   if(req.method==='GET'){
