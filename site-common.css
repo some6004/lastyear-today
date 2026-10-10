@@ -1,0 +1,15 @@
+/* Shared brand system for every public page */
+:root{--lyt-paper:#f3f0e9;--lyt-ink:#24231f;--lyt-muted:#77736b;--lyt-line:#d7d2c9}
+.logo,.logo:link,.logo:visited{font-family:"Noto Serif KR",serif!important;font-size:28px!important;font-weight:400!important;line-height:1!important;letter-spacing:-.09em!important;color:var(--lyt-ink)!important;text-decoration:none!important;white-space:nowrap}
+.logo span{font-family:inherit!important;font-size:inherit!important;font-weight:inherit!important;letter-spacing:inherit!important;color:inherit!important;line-height:inherit!important}
+a.logo:hover{opacity:.82}
+.lyt-footer{width:100%;max-width:1180px;margin:44px auto 0;padding:22px 28px 26px;border-top:1px solid var(--lyt-line);display:flex;align-items:center;justify-content:space-between;gap:18px;color:var(--lyt-muted);font:12px/1.7 Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif}
+.lyt-footer-brand{display:flex;flex-direction:column;gap:5px;min-width:170px}
+.lyt-footer-logo{font:400 20px/1 "Noto Serif KR",serif;letter-spacing:-.09em;color:var(--lyt-ink)}
+.lyt-footer-tagline{font-size:11px}
+.lyt-footer-center{text-align:center;flex:1}
+.lyt-footer-links{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 16px;margin-bottom:7px}
+.lyt-footer a{color:inherit;text-decoration:none}
+.lyt-footer a:hover{color:var(--lyt-ink);text-decoration:underline}
+.lyt-footer-copy{font-size:11px}
+@media(max-width:640px){.lyt-footer{margin-top:32px;padding:20px 22px 26px;flex-direction:column;align-items:center;text-align:center;gap:12px}.lyt-footer-brand{align-items:center}.lyt-footer-center{flex:auto}.lyt-footer-links{gap:8px 12px}}
