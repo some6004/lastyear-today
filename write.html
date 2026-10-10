@@ -52,10 +52,9 @@
 </main>
 <div class="toast" id="toast" role="status" aria-live="polite"></div><footer class="footer"><span>© 2026 작년, 오늘</span><span>나의 모든 기록을 기억하는 개인 AI 아카이브</span></footer>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase-config.js"></script>
+<script src="neon-auth.js"></script>
 <script>
-const writeAuthClient=window.supabase.createClient(window.LYT_SUPABASE_URL,window.LYT_SUPABASE_KEY);
+const writeAuthClient=window.LYT_AUTH_CLIENT;
 window.LYT_selectedImage='';window.LYT_selectedImageUrl='';
 async function saveEntryToNeon(payload){
  const {data:{session},error}=await writeAuthClient.auth.getSession();
