@@ -41,7 +41,7 @@
 
 <script src="neon-auth.js"></script>
 <script>
-const supabaseClient = window.LYT_AUTH_CLIENT;
+const neonAuthClient = window.LYT_AUTH_CLIENT;
 let currentUser = null;
 let serverSyncBusy = false;
 function accountMessage(message){const el=document.getElementById('accountStatus');if(el)el.textContent=message}
@@ -50,7 +50,7 @@ async function syncJournalsToServer(items){
  if(!currentUser||serverSyncBusy)return;
  serverSyncBusy=true;
  try{
-  const {data:{session}}=await supabaseClient.auth.getSession();
+  const {data:{session}}=await neonAuthClient.auth.getSession();
   if(!session?.access_token)throw new Error('로그인 세션이 없습니다.');
   const payload=items.map(j=>({...j,id:j.id||newId(),name:j.name,desc:j.desc||'',image:j.image||'',visibility:j.visibility||'private'}));
   payload.forEach((row,i)=>{items[i].id=row.id});
@@ -69,7 +69,7 @@ async function syncJournalsToServer(items){
 async function markJournalDeleted(j,deleted){
  if(!currentUser||!j.id)return;
  try{
-  const {data:{session}}=await supabaseClient.auth.getSession();
+  const {data:{session}}=await neonAuthClient.auth.getSession();
   if(!session?.access_token)throw new Error('로그인 세션이 없습니다.');
   if(deleted){
    const response=await fetch('/api/journals?id='+encodeURIComponent(j.id),{method:'DELETE',headers:{'Authorization':'Bearer '+session.access_token}});
@@ -81,12 +81,12 @@ async function markJournalDeleted(j,deleted){
 }
 async function initServerSync(){
  try{
-  const {data:{session},error:sessionError}=await supabaseClient.auth.getSession();
+  const {data:{session},error:sessionError}=await neonAuthClient.auth.getSession();
   if(sessionError)throw sessionError;
   currentUser=session?.user||null;
   const link=document.getElementById('accountLink');
   if(!currentUser){accountMessage('이 기기에서만 저장 중 · 로그인하면 기기 간 동기화');if(link){link.textContent='로그인';link.href='login.html'}return}
-  if(link){link.textContent='로그아웃';link.href='#';link.onclick=async e=>{e.preventDefault();await supabaseClient.auth.signOut();location.reload()}}
+  if(link){link.textContent='로그아웃';link.href='#';link.onclick=async e=>{e.preventDefault();await neonAuthClient.auth.signOut();location.reload()}}
   accountMessage('Neon 서버 기록 불러오는 중…');
   const response=await fetch('/api/journals',{headers:{'Authorization':'Bearer '+session.access_token}});
   const result=await response.json();
