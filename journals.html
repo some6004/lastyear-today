@@ -85,7 +85,7 @@ async function initServerSync(){
   if(sessionError)throw sessionError;
   currentUser=session?.user||null;
   const link=document.getElementById('accountLink');
-  if(!currentUser){accountMessage('로그인 후 서버에 저장됩니다. 로그인하지 않으면 기록을 저장할 수 없습니다.');if(link){link.textContent='로그인';link.href='login.html'}return}
+  if(!currentUser){location.replace('login.html?redirect=journals.html');return}
   if(link){link.textContent='로그아웃';link.href='#';link.onclick=async e=>{e.preventDefault();await neonAuthClient.auth.signOut();location.reload()}}
   accountMessage('Neon 서버 기록 불러오는 중…');
   const response=await fetch('/api/journals',{headers:{'Authorization':'Bearer '+session.access_token}});
