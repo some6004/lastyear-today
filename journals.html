@@ -85,7 +85,7 @@ async function initServerSync(){
   if(sessionError)throw sessionError;
   currentUser=session?.user||null;
   const link=document.getElementById('accountLink');
-  if(!currentUser){accountMessage('이 기기에서만 저장 중 · 로그인하면 기기 간 동기화');if(link){link.textContent='로그인';link.href='login.html'}return}
+  if(!currentUser){accountMessage('로그인 후 서버에 저장됩니다. 로그인하지 않으면 기록을 저장할 수 없습니다.');if(link){link.textContent='로그인';link.href='login.html'}return}
   if(link){link.textContent='로그아웃';link.href='#';link.onclick=async e=>{e.preventDefault();await neonAuthClient.auth.signOut();location.reload()}}
   accountMessage('Neon 서버 기록 불러오는 중…');
   const response=await fetch('/api/journals',{headers:{'Authorization':'Bearer '+session.access_token}});
@@ -127,9 +127,9 @@ const samples=[
 ];
 let editIndex=-1, selectedImage='';
 function getCustom(){try{return JSON.parse(localStorage.getItem(customKey)||'[]')}catch(e){return[]}}
-function saveCustom(a){localStorage.setItem(customKey,JSON.stringify(a));if(currentUser)syncJournalsToServer(a)}
+function saveCustom(a){if(!currentUser){accountMessage('기록장을 저장하려면 먼저 로그인해 주세요.');return false}localStorage.setItem(customKey,JSON.stringify(a));syncJournalsToServer(a);return true}
 function getDeleted(){try{return JSON.parse(localStorage.getItem(deletedKey)||'[]')}catch(e){return[]}}
-function saveDeleted(a){localStorage.setItem(deletedKey,JSON.stringify(a))}
+function saveDeleted(a){if(!currentUser){accountMessage('기록장을 관리하려면 먼저 로그인해 주세요.');return false}localStorage.setItem(deletedKey,JSON.stringify(a));return true}
 function purgeDeleted(){const now=Date.now();const kept=getDeleted().filter(j=>j.expiresAt>now);if(kept.length!==getDeleted().length)saveDeleted(kept);return kept}
 function formatDate(ts){const d=new Date(ts);return d.getFullYear()+'. '+String(d.getMonth()+1).padStart(2,'0')+'. '+String(d.getDate()).padStart(2,'0')}
 function daysLeft(ts){return Math.max(0,Math.ceil((ts-Date.now())/DAY))}
