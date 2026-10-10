@@ -23,12 +23,18 @@ function cleanEntry(body) {
   const visibility = ['private', 'public', 'unlisted'].includes(body.visibility) ? body.visibility : 'private';
   const metadata = body.metadata && typeof body.metadata === 'object' && !Array.isArray(body.metadata) ? body.metadata : {};
   const image = typeof metadata.imageDataUrl === 'string' ? metadata.imageDataUrl : '';
+  const imageUrl = typeof metadata.imageUrl === 'string' ? metadata.imageUrl : '';
   if (image && (!/^data:image\/(jpeg|png|webp);base64,/.test(image) || image.length > 3500000)) {
     const error = new Error('사진 크기 또는 형식을 확인해 주세요. 사진은 2.5MB 이하로 올려 주세요.');
     error.status = 400;
     throw error;
   }
-  return { entryDate, title, content, visibility, metadata: { ...metadata, imageDataUrl: image || undefined } };
+  if (imageUrl && (!/^https:\/\//i.test(imageUrl) || imageUrl.length > 2000)) {
+    const error = new Error('사진 주소를 확인해 주세요.');
+    error.status = 400;
+    throw error;
+  }
+  return { entryDate, title, content, visibility, metadata: { ...metadata, imageDataUrl: image || undefined, imageUrl: imageUrl || undefined } };
 }
 
 module.exports = async function handler(req, res) {
