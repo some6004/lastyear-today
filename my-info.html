@@ -25,7 +25,7 @@
 <button class="plan-option" data-plan="프로" data-price="₩9,900 / 월" onclick="selectPlan(this)"><strong>프로</strong><span>대용량 · 고급 AI · 전체 기능</span></button>
 </div></section>
 <div class="save-row"><span class="status" id="status">변경사항을 저장하세요.</span><button class="save" onclick="saveInfo()">정보 저장하기 →</button></div>
-<div class="danger">회원 탈퇴나 결제 관련 세부 처리는 실제 서비스의 인증·결제 시스템 연결 후 안전하게 처리됩니다.</div>
+<section class="danger" id="withdrawalPanel"><h2 style="font:400 24px 'Noto Serif KR',serif;margin:0 0 12px">회원 탈퇴</h2><p style="font-size:13px;line-height:1.9">탈퇴 신청 즉시 로그인이 제한됩니다. 회원정보와 기록은 탈퇴 신청일로부터 30일 동안 보관한 뒤 삭제 절차가 진행됩니다. 30일 이내에 철회를 원하면 <a href="support.html" style="text-decoration:underline;color:inherit">1:1 문의하기</a>에서 관리자에게 요청해 주세요. 관리자 확인 후에만 계정이 복구됩니다. 삭제 완료 후에는 복구할 수 없습니다.</p><p id="withdrawalStatus" style="font-size:12px;line-height:1.8"></p><button id="withdrawButton" type="button" style="border:1px solid #8b4a4a;color:#8b4a4a;background:transparent;padding:12px 16px;font:13px Pretendard;cursor:pointer">회원 탈퇴 신청 →</button></section>
 </main><div class="toast" id="toast" role="status" aria-live="polite"></div><footer class="footer"><span>© 2026 작년, 오늘</span><span>나의 모든 기록을 기억하는 개인 AI 아카이브</span></footer></div>
 <script>
 let selectedPlan='무료';
