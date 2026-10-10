@@ -61,6 +61,32 @@ module.exports = async function handler(req, res) {
         [userId, username, name, nickname, birthDate, phone]);
       return res.status(200).json({ ok: true });
     }
+    if (req.method === 'POST' && req.body && req.body.action === 'reply_inquiry') {
+      if (!isAdmin(req)) return res.status(401).json({ error: '관리자 로그인이 필요합니다.' });
+      const id = Number(req.body.inquiry_id || 0);
+      const message = String(req.body.message || '').trim().slice(0, 10000);
+      if (!id || message.length < 2) return res.status(400).json({ error: '문의와 답변 내용을 확인해 주세요.' });
+      const db = getPool();
+      const inquiry = await db.query('SELECT id FROM public.lyt_inquiries WHERE id=$1', [id]);
+      if (!inquiry.rows.length) return res.status(404).json({ error: '문의를 찾을 수 없습니다.' });
+      const client = await db.connect();
+      try {
+        await client.query('BEGIN');
+        await client.query("INSERT INTO public.lyt_inquiry_messages(inquiry_id,sender_type,sender_name,message) VALUES($1,'admin','작년, 오늘 관리자',$2)", [id, message]);
+        await client.query("UPDATE public.lyt_inquiries SET status='answered',updated_at=now() WHERE id=$1", [id]);
+        await client.query('COMMIT');
+      } catch (e) { await client.query('ROLLBACK'); throw e; } finally { client.release(); }
+      return res.status(200).json({ ok: true });
+    }
+    if (req.method === 'POST' && req.body && req.body.action === 'restore_withdrawal') {
+      if (!isAdmin(req)) return res.status(401).json({ error: '관리자 로그인이 필요합니다.' });
+      const userId = String(req.body.user_id || '').trim();
+      if (!userId) return res.status(400).json({ error: '회원 계정을 확인해 주세요.' });
+      const db = getPool();
+      const result = await db.query("UPDATE public.lyt_profiles SET withdrawal_status='active',withdrawal_requested_at=NULL,withdrawal_scheduled_at=NULL,updated_at=now() WHERE user_id=$1 AND withdrawal_status='pending' RETURNING user_id", [userId]);
+      if (!result.rows.length) return res.status(404).json({ error: '탈퇴 접수 중인 회원을 찾을 수 없습니다.' });
+      return res.status(200).json({ ok: true });
+    }
     if (req.method === 'DELETE') {
       res.setHeader('Set-Cookie', COOKIE + '=; HttpOnly; Secure; SameSite=Strict; Path=/api/admin; Max-Age=0');
       return res.status(200).json({ ok: true });
@@ -71,7 +97,7 @@ module.exports = async function handler(req, res) {
     }
     if (!isAdmin(req)) return res.status(401).json({ error: '관리자 로그인이 필요합니다.' });
     const db = getPool();
-    const [stats, members, contentStats, entries] = await Promise.all([
+    const [stats, members, contentStats, entries, inquiries] = await Promise.all([
       db.query(`SELECT
         (SELECT COUNT(*)::int FROM neon_auth."user") AS members,
         (SELECT COUNT(*)::int FROM public.lyt_journals WHERE deleted_at IS NULL) AS journals,
@@ -84,7 +110,7 @@ module.exports = async function handler(req, res) {
         COALESCE(p.username, NULLIF(split_part(u.email, '@', 1), '')) AS username,
         COALESCE(p.display_name, u.name) AS display_name,
         COALESCE(p.nickname, p.display_name, u.name) AS nickname,
-        p.birth_date, p.phone, COALESCE(p.created_at, u."createdAt") AS created_at,
+        p.birth_date, p.phone, p.withdrawal_status, p.withdrawal_requested_at, p.withdrawal_scheduled_at, COALESCE(p.created_at, u."createdAt") AS created_at,
         (SELECT COUNT(*)::int FROM public.lyt_journals j WHERE j.owner_id=u.id::text AND j.deleted_at IS NULL) AS journal_count,
         (SELECT COUNT(*)::int FROM public.lyt_entries e WHERE e.owner_id=u.id::text AND e.deleted_at IS NULL) AS entry_count
         FROM neon_auth."user" u
@@ -97,13 +123,18 @@ module.exports = async function handler(req, res) {
       db.query(`SELECT e.id, e.owner_id, p.username, COALESCE(p.nickname,p.display_name,p.username,'회원') AS author,
         e.entry_date, e.title, e.content, e.visibility, e.metadata, e.created_at
         FROM public.lyt_entries e LEFT JOIN public.lyt_profiles p ON p.user_id=e.owner_id
-        WHERE e.deleted_at IS NULL ORDER BY e.entry_date DESC, e.updated_at DESC LIMIT 100`)
+        WHERE e.deleted_at IS NULL ORDER BY e.entry_date DESC, e.updated_at DESC LIMIT 100`),
+      db.query(`SELECT i.id,i.name,i.email,i.subject,i.status,i.created_at,i.updated_at,
+        (SELECT m.message FROM public.lyt_inquiry_messages m WHERE m.inquiry_id=i.id AND m.sender_type='customer' ORDER BY m.created_at ASC LIMIT 1) AS initial_message,
+        (SELECT COUNT(*)::int FROM public.lyt_inquiry_messages m WHERE m.inquiry_id=i.id) AS message_count
+        FROM public.lyt_inquiries i ORDER BY CASE WHEN i.status='open' THEN 0 ELSE 1 END, i.updated_at DESC LIMIT 300`)
     ]);
     return res.status(200).json({
       stats: stats.rows[0],
       members: members.rows,
       contentStats: contentStats.rows,
-      entries: entries.rows
+      entries: entries.rows,
+      inquiries: inquiries.rows
     });
   } catch (error) {
     console.error('admin dashboard error', error);
