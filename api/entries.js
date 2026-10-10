@@ -6,6 +6,16 @@ function validDate(value) {
   const d = new Date(value + 'T00:00:00Z');
   return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value;
 }
+function hideDuplicateTitle(entry) {
+  if (!entry) return entry;
+  const title = String(entry.title || '').trim();
+  const content = String(entry.content || '').trim();
+  // The writing page historically used the entire body as its title.
+  // Do not return that duplicate title to readers; keep the saved content intact.
+  if (title && content && title === content) return { ...entry, title: '' };
+  return entry;
+}
+
 function cleanEntry(body) {
   const entryDate = String(body.entry_date || '');
   if (!validDate(entryDate)) {
@@ -53,7 +63,7 @@ module.exports = async function handler(req, res) {
           [id, user.id]
         );
         if (!one.rows[0]) return res.status(404).json({ error: '기록을 찾을 수 없습니다.' });
-        return res.status(200).json({ entry: one.rows[0] });
+        return res.status(200).json({ entry: hideDuplicateTitle(one.rows[0]) });
       }
       const date = typeof req.query.date === 'string' ? req.query.date : null;
       if (date && !validDate(date)) return res.status(400).json({ error: '기록 날짜를 확인해 주세요.' });
@@ -66,7 +76,7 @@ module.exports = async function handler(req, res) {
          LIMIT 500`,
         [user.id, date]
       );
-      return res.status(200).json({ entries: result.rows });
+      return res.status(200).json({ entries: result.rows.map(hideDuplicateTitle) });
     }
 
     if (req.method === 'POST' || req.method === 'PUT') {
