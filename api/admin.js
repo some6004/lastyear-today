@@ -20,7 +20,7 @@ function isAdmin(req) {
   if (!process.env.ADMIN_USERNAME || !process.env.ADMIN_PASSWORD || !process.env.ADMIN_SESSION_SECRET) return false;
   const token = cookieValue(req);
   const [expires, mac] = token.split('.');
-  if (!expires || !mac || !/^\\d+$/.test(expires) || Number(expires) < Date.now()) return false;
+  if (!expires || !mac || !/^\d+$/.test(expires) || Number(expires) < Date.now()) return false;
   return safeEqual(mac, sign(expires));
 }
 module.exports = async function handler(req, res) {
