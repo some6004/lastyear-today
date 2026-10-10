@@ -12,14 +12,21 @@
 (async function(){
  const status=document.getElementById('status'), card=document.getElementById('comparison');
  try{
-  const client=window.LYT_AUTH_CLIENT;
-  if(!client)throw new Error('로그인 정보를 확인하지 못했어요. 다시 로그인해 주세요.');
-  const {data:{session},error}=await client.auth.getSession();
-  if(error)throw error;
-  if(!session||!session.access_token){status.innerHTML='기록을 보려면 먼저 <a href="login.html?redirect=record-view.html" style="color:inherit">로그인</a>해 주세요.';return;}
-  const id=new URLSearchParams(location.search).get('id');
+  const params=new URLSearchParams(location.search);
+  const demo=params.get('demo')==='1';
+  const id=params.get('id');
   if(!id)throw new Error('열어볼 기록을 찾지 못했어요.');
-  const response=await fetch('/api/entries?id='+encodeURIComponent(id),{headers:{Authorization:'Bearer '+session.access_token},cache:'no-store'});
+  let response;
+  if(demo){
+    response=await fetch('/api/demo-entries?id='+encodeURIComponent(id),{cache:'no-store'});
+  }else{
+    const client=window.LYT_AUTH_CLIENT;
+    if(!client)throw new Error('로그인 정보를 확인하지 못했어요. 다시 로그인해 주세요.');
+    const {data:{session},error}=await client.auth.getSession();
+    if(error)throw error;
+    if(!session||!session.access_token){status.innerHTML='기록을 보려면 먼저 <a href="login.html?redirect=record-view.html" style="color:inherit">로그인</a>해 주세요.';return;}
+    response=await fetch('/api/entries?id='+encodeURIComponent(id),{headers:{Authorization:'Bearer '+session.access_token},cache:'no-store'});
+  }
   const result=await response.json();
   if(!response.ok)throw new Error(result.error||'기록을 불러오지 못했어요.');
   const r=result.entry;
@@ -42,7 +49,9 @@
   document.getElementById('pastDate').textContent=pastKey.replaceAll('-','. ');
   document.getElementById('pastTitle').textContent='작년 오늘의 기록';
   document.getElementById('pastContent').textContent='작년 오늘에 남긴 기록을 찾아보고 있어요…';
-  const pastResponse=await fetch('/api/entries?date='+encodeURIComponent(pastKey),{headers:{Authorization:'Bearer '+session.access_token},cache:'no-store'});
+  const pastResponse=demo
+    ? await fetch('/api/demo-entries?date='+encodeURIComponent(pastKey),{cache:'no-store'})
+    : await fetch('/api/entries?date='+encodeURIComponent(pastKey),{headers:{Authorization:'Bearer '+session.access_token},cache:'no-store'});
   const pastResult=await pastResponse.json();
   if(pastResponse.ok){
     const past=(pastResult.entries||[]).find(item=>String(item.entry_date).slice(0,10)===pastKey);
