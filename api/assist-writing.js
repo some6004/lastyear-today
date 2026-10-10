@@ -36,8 +36,8 @@ module.exports = async function handler(req, res) {
       headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'gpt-5-nano',
-        temperature: 0.75,
-        max_tokens: 450,
+        max_completion_tokens: 450,
+        reasoning_effort: 'low',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
