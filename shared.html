@@ -16,7 +16,8 @@
 .empty{display:none;text-align:center;padding:70px 0;color:#999}
 @media(max-width:700px){.wrap{padding:0 20px}.popular-grid{grid-template-columns:repeat(2,1fr);gap:10px}.popular-card .thumb{height:145px}.popular-card .info{padding:15px}.popular-card h3{font-size:18px}.popular-head h2{font-size:24px}.nav{height:72px}.hero{padding:50px 0 38px}.grid{grid-template-columns:1fr 1fr;gap:10px}.thumb{height:145px}.info{padding:15px}.card h3{font-size:18px}.desc{font-size:11px}.meta{font-size:9px}.feed-head h2{font-size:24px}}
 @media(max-width:450px){.popular-grid{grid-template-columns:1fr}.popular-card .thumb{height:190px}.grid{grid-template-columns:1fr}.thumb{height:190px}}
-</style></head><body><div class="wrap">
+</style><link rel="stylesheet" href="site-common.css">
+</head><body><div class="wrap">
 <header class="nav"><a class="logo" href="index.html" aria-label="작년, 오늘"><span>작</span><span>년</span><span>,</span><span> 오늘</span></a><a class="back" href="index.html">← 돌아가기</a></header>
 <main>
 <section class="hero"><div class="eyebrow">PUBLIC STORIES</div><h1>사람들의 일상을<br>구경해보세요.</h1><p>누군가에게는 평범한 하루가,<br>다른 누군가에게는 오래 기억하고 싶은 이야기가 됩니다.</p></section>
@@ -40,4 +41,5 @@
 const buttons=document.querySelectorAll('.filter'),cards=document.querySelectorAll('#feedGrid .card'),empty=document.getElementById('empty');
 buttons.forEach(b=>b.addEventListener('click',()=>{buttons.forEach(x=>x.classList.remove('active'));b.classList.add('active');const f=b.dataset.filter;let n=0;cards.forEach(c=>{const show=f==='all'||c.dataset.cat===f;c.style.display=show?'block':'none';if(show)n++});empty.style.display=n?'none':'block'}));
 </script><!-- Vercel automatic deployment check: 2026-10-09 -->
+<script src="site-common.js"></script>
 </body></html>
