@@ -17,6 +17,10 @@
       async signInWithPassword(credentials) { return (await clientPromise).signInWithPassword(credentials); },
       async signInWithOAuth(options) { return (await clientPromise).signInWithOAuth(options); },
       async signUp(credentials) { return (await clientPromise).signUp(credentials); },
+      async resetPasswordForEmail(email, options) { return (await clientPromise).resetPasswordForEmail(email, options); },
+      async updateUser(attributes) { return (await clientPromise).updateUser(attributes); },
+      async verifyOtp(params) { return (await clientPromise).verifyOtp(params); },
+      async resend(params) { return (await clientPromise).resend(params); },
       async signOut() { return (await clientPromise).signOut(); },
       async getUser() { return (await clientPromise).getUser(); },
       async onAuthStateChange(callback) { return (await clientPromise).onAuthStateChange(callback); }
