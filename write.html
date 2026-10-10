@@ -94,18 +94,35 @@ swipe.addEventListener('touchstart',e=>swipeStart(e.touches[0].clientX,e.touches
 function updatePrivacyStatus(){const pub=document.getElementById('public').checked;document.getElementById('status').textContent=pub?'공개 기록으로 저장합니다.':'당신만의 비공개 기록으로 남습니다.'}
 function showToast(message){const t=document.getElementById('toast');t.textContent=message;t.classList.add('show');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.classList.remove('show'),1800)}
 let keywordDraftText='';let selectedWritingTone='담백하게';
-const writingPreferenceKey=()=> 'lyt_writing_preferences:'+((new URLSearchParams(location.search).get('journal')||'__default__').trim().toLowerCase());
-function loadWritingPreferences(){
+async function getWritingPreferenceSession(){
+ const result=await neonAuthClient.auth.getSession();
+ const session=result&&result.data&&result.data.session;
+ if(!session||!session.access_token)throw new Error('로그인이 필요합니다.');
+ return session;
+}
+async function loadWritingPreferences(){
  try{
-  const saved=JSON.parse(localStorage.getItem(writingPreferenceKey())||'{}');
-  const context=document.getElementById('writingContext');
+  const session=await getWritingPreferenceSession();
+  const journal=new URLSearchParams(location.search).get('journal')||'';
+  const response=await fetch('/api/writing-preferences?journal='+encodeURIComponent(journal),{headers:{Authorization:'Bearer '+session.access_token},cache:'no-store'});
+  const data=await response.json();
+  if(!response.ok)throw new Error(data.error||'설정을 불러오지 못했습니다.');
+  const saved=data.preference||{}, context=document.getElementById('writingContext');
   if(saved.context&&Array.from(context.options).some(o=>o.value===saved.context))context.value=saved.context;
   if(saved.tone&&document.querySelector('#writingTones .tone-button[data-tone="'+CSS.escape(saved.tone)+'"]'))selectedWritingTone=saved.tone;
   document.querySelectorAll('#writingTones .tone-button').forEach(item=>item.classList.toggle('selected',item.dataset.tone===selectedWritingTone));
- }catch(e){console.warn('writing preferences load failed',e)}
+ }catch(e){console.warn('server writing preferences load failed',e)}
 }
+let writingPreferenceSaveTimer;
 function saveWritingPreferences(){
- try{localStorage.setItem(writingPreferenceKey(),JSON.stringify({context:document.getElementById('writingContext').value,tone:selectedWritingTone}));}catch(e){console.warn('writing preferences save failed',e)}
+ clearTimeout(writingPreferenceSaveTimer);
+ writingPreferenceSaveTimer=setTimeout(async()=>{
+  try{
+   const session=await getWritingPreferenceSession();
+   const response=await fetch('/api/writing-preferences',{method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+session.access_token},body:JSON.stringify({journal:new URLSearchParams(location.search).get('journal')||'',context:document.getElementById('writingContext').value,tone:selectedWritingTone})});
+   if(!response.ok)throw new Error('설정을 서버에 저장하지 못했습니다.');
+  }catch(e){console.warn('server writing preferences save failed',e);const status=document.getElementById('keywordDraftStatus');if(status)status.textContent='설정을 서버에 저장하지 못했어요. 로그인 상태를 확인해 주세요.'}
+ },180);
 }
 document.querySelectorAll('#writingTones .tone-button').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('#writingTones .tone-button').forEach(item=>item.classList.toggle('selected',item===button));selectedWritingTone=button.dataset.tone;saveWritingPreferences();}));
 document.getElementById('writingContext').addEventListener('change',saveWritingPreferences);
