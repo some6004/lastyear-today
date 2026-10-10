@@ -13,16 +13,16 @@ module.exports = async function handler(req, res) {
     }
     if (req.method === 'POST' || req.method === 'PUT') {
       const body = req.body || {};
-      const username = String(body.username || '').trim().toLowerCase();
+      const email = String(body.email || user.email || '').trim().toLowerCase();
+      // Legacy database compatibility only. Users do not choose or log in with this value.
+      const username = (email.split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 12) || 'member') + '_' + String(user.id || '').replace(/[^a-z0-9]/gi, '').slice(-8).toLowerCase();
       const displayName = String(body.name || '').trim();
       const nickname = String(body.nickname || '').trim();
       const birthDate = String(body.birth_date || '').trim();
       const phone = String(body.phone || '').replace(/[\s-]/g, '');
-      const email = String(body.email || user.email || '').trim().toLowerCase();
       const privacyConsent = body.privacy_consent === true;
       const policyVersion = String(body.privacy_policy_version || '').trim();
       const marketingConsent = body.marketing_email_consent === true;
-      if (!/^[a-z0-9_]{3,24}$/.test(username)) return res.status(400).json({ error: '아이디는 영문 소문자, 숫자, 밑줄로 3~24자 입력해 주세요.' });
       if (!displayName || displayName.length > 80) return res.status(400).json({ error: '이름을 입력해 주세요.' });
       if (!nickname || nickname.length > 40) return res.status(400).json({ error: '표시할 대화명을 1~40자로 입력해 주세요.' });
       if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate) || Number.isNaN(Date.parse(birthDate))) return res.status(400).json({ error: '생년월일을 확인해 주세요.' });
@@ -41,7 +41,7 @@ module.exports = async function handler(req, res) {
     res.setHeader('Allow', 'GET, POST, PUT');
     return res.status(405).json({ error: '지원하지 않는 요청입니다.' });
   } catch (error) {
-    if (error && error.code === '23505') return res.status(409).json({ error: '이미 사용 중인 아이디입니다.' });
+    if (error && error.code === '23505') return res.status(409).json({ error: '프로필 정보가 중복됩니다. 입력 정보를 확인해 주세요.' });
     return sendError(res, error);
   }
 };
