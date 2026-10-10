@@ -25,7 +25,7 @@
 <a class="mobile-memory-preview" href="#memory"><div class="mobile-memory-thumb" id="mobileMemoryThumb"></div><div class="mobile-memory-copy"><div class="mobile-memory-kicker">ONE YEAR AGO</div><strong>작년, 오늘</strong><span id="mobileMemoryDate">2025. 10. 09</span><p id="mobileMemoryText">아침부터 현장에 나가 정신없이 하루를 보냈다.</p></div><span class="mobile-memory-arrow">↓</span></a>
 <section class="editor">
 <div><input class="date-select" id="date" type="date" aria-label="기록 날짜"></div>
-<div class="write-layout"><div class="writing-area"><div class="keyword-writer"><div class="keyword-label"><span>키워드로 글쓰기</span><small>단어 몇 개로 초안 만들기</small></div><input id="writingKeywords" class="keyword-input" type="text" maxlength="240" placeholder="예: 아이 첫걸음, 공원 산책, 뿌듯했던 하루"><div class="keyword-options"><label class="keyword-select-label" for="writingContext">기록의 성격</label><select id="writingContext" class="keyword-length" aria-label="기록의 성격"><option value="일상">일상</option><option value="육아">육아</option><option value="여행">여행</option><option value="업무">업무</option><option value="가족">가족</option><option value="연애·관계">연애·관계</option><option value="건강·운동">건강·운동</option><option value="취미">취미</option><option value="기타">기타</option></select></div><div class="keyword-tone-wrap"><div class="keyword-select-label">문체</div><div class="keyword-tones" id="writingTones"><button type="button" class="tone-button selected" data-tone="담백하게">담백하게</button><button type="button" class="tone-button" data-tone="감성적으로">감성적으로</button><button type="button" class="tone-button" data-tone="밝고 유쾌하게">밝고 유쾌하게</button><button type="button" class="tone-button" data-tone="딱딱한 업무톤">딱딱한 업무톤</button><button type="button" class="tone-button" data-tone="다정하게">다정하게</button><button type="button" class="tone-button" data-tone="유머러스하게">유머러스하게</button></div></div><div class="keyword-tools"><span id="keywordUsageCount" class="keyword-usage">무료 · 무제한 생성</span><button id="generateDraftBtn" class="keyword-generate" type="button" onclick="generateKeywordDraft()">문장 생성</button></div><div id="keywordDraftStatus" style="font-size:11px;color:var(--faint);margin-top:9px" aria-live="polite">키워드 2개 이상을 쉼표로 구분해 적어 주세요. 무료로 횟수 제한 없이 만들 수 있어요.</div><div id="keywordDraftPreview" class="keyword-preview"></div><div id="keywordDraftActions" class="keyword-actions" style="display:none"><button type="button" onclick="useKeywordDraft(false)">글 뒤에 붙이기</button><button type="button" onclick="useKeywordDraft(true)">본문으로 사용</button></div></div><textarea id="content" placeholder="오늘의 하루를 천천히 적어보세요.
+<div class="write-layout"><div class="writing-area"><div class="keyword-writer"><div class="keyword-label"><span>AI로 글쓰기</span><small>키워드로 오늘의 기록 초안 만들기</small></div><input id="writingKeywords" class="keyword-input" type="text" maxlength="240" placeholder="예: 아이 첫걸음, 공원 산책, 뿌듯했던 하루"><div class="keyword-options"><label class="keyword-select-label" for="writingContext">기록의 성격</label><select id="writingContext" class="keyword-length" aria-label="기록의 성격"><option value="일상">일상</option><option value="육아">육아</option><option value="여행">여행</option><option value="업무">업무</option><option value="가족">가족</option><option value="연애·관계">연애·관계</option><option value="건강·운동">건강·운동</option><option value="취미">취미</option><option value="기타">기타</option></select></div><div class="keyword-tone-wrap"><div class="keyword-select-label">문체</div><div class="keyword-tones" id="writingTones"><button type="button" class="tone-button selected" data-tone="담백하게">담백하게</button><button type="button" class="tone-button" data-tone="감성적으로">감성적으로</button><button type="button" class="tone-button" data-tone="밝고 유쾌하게">밝고 유쾌하게</button><button type="button" class="tone-button" data-tone="딱딱한 업무톤">딱딱한 업무톤</button><button type="button" class="tone-button" data-tone="다정하게">다정하게</button><button type="button" class="tone-button" data-tone="유머러스하게">유머러스하게</button></div></div><div class="keyword-tools"><span id="keywordUsageCount" class="keyword-usage">베타 · 모든 회원 무료 이용</span><button id="generateDraftBtn" class="keyword-generate" type="button" onclick="generateKeywordDraft()">AI 초안 만들기</button></div><div id="keywordDraftStatus" style="font-size:11px;color:var(--faint);margin-top:9px" aria-live="polite">키워드 2개 이상을 쉼표로 구분해 적어 주세요. 무료로 횟수 제한 없이 만들 수 있어요.</div><div id="keywordDraftPreview" class="keyword-preview"></div><div id="keywordDraftActions" class="keyword-actions" style="display:none"><button type="button" onclick="useKeywordDraft(false)">글 뒤에 붙이기</button><button type="button" onclick="useKeywordDraft(true)">본문으로 사용</button></div></div><textarea id="content" placeholder="오늘의 하루를 천천히 적어보세요.
 
 무슨 일이 있었는지,
 어떤 생각을 했는지,
@@ -175,19 +175,20 @@ function makeLocalDraft(rawKeywords, context, tone){
  if(extras.length&&words.length>=4&&tone==='담백하게')middle+=' '+extras.slice(0,2).join('와 ')+'도 함께 기억해 둔다.';
  return [lead,middle,close].filter(Boolean).join(' ');
 }
-function generateKeywordDraft(){
+async function generateKeywordDraft(){
  const keywords=document.getElementById('writingKeywords').value.trim();
  const status=document.getElementById('keywordDraftStatus'),preview=document.getElementById('keywordDraftPreview'),btn=document.getElementById('generateDraftBtn');
  if(keywords.length<2){status.textContent='키워드를 두 글자 이상 입력해 주세요.';return}
- const words=keywords.split(/[,，、;；\n]+/).map(x=>x.trim()).filter(Boolean);
- if(words.length<2){status.textContent='키워드를 쉼표로 구분해 2개 이상 입력하면 더 자연스러워요. 한 개만 입력해도 생성할 수 있어요.';}
- btn.disabled=true;status.textContent='입력한 키워드로 문장을 조합하고 있어요…';preview.classList.remove('show');document.getElementById('keywordDraftActions').style.display='none';
+ btn.disabled=true;status.textContent='AI가 오늘의 기록을 작성하고 있어요…';preview.classList.remove('show');document.getElementById('keywordDraftActions').style.display='none';
  try{
-  keywordDraftText=makeLocalDraft(keywords,document.getElementById('writingContext').value,selectedWritingTone);
-  if(!keywordDraftText)throw new Error('키워드를 입력해 주세요.');
+  const response=await fetch('/api/assist-writing',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({keywords,context:document.getElementById('writingContext').value,tone:selectedWritingTone,date:document.getElementById('date').value})});
+  const result=await response.json();
+  if(!response.ok)throw new Error(result.error||'AI 문장 생성에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+  keywordDraftText=String(result.draft||'').trim();
+  if(!keywordDraftText)throw new Error('생성된 문장이 비어 있습니다. 다시 시도해 주세요.');
   preview.textContent=keywordDraftText;preview.classList.add('show');document.getElementById('keywordDraftActions').style.display='flex';
-  status.textContent='문장이 준비됐어요. 무료로 횟수 제한 없이 만들 수 있어요.';
- }catch(e){status.textContent=e.message||'문장을 만들지 못했어요.'}
+  status.textContent='AI 초안이 준비됐어요. 베타 기간에는 모든 회원이 무료로 이용할 수 있어요.';
+ }catch(e){status.textContent=e.message||'AI 문장을 만들지 못했어요.'}
  finally{btn.disabled=false}
 }
 function useKeywordDraft(replace){
