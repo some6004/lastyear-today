@@ -94,7 +94,22 @@ swipe.addEventListener('touchstart',e=>swipeStart(e.touches[0].clientX,e.touches
 function updatePrivacyStatus(){const pub=document.getElementById('public').checked;document.getElementById('status').textContent=pub?'공개 기록으로 저장합니다.':'당신만의 비공개 기록으로 남습니다.'}
 function showToast(message){const t=document.getElementById('toast');t.textContent=message;t.classList.add('show');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.classList.remove('show'),1800)}
 let keywordDraftText='';let selectedWritingTone='담백하게';
-document.querySelectorAll('#writingTones .tone-button').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('#writingTones .tone-button').forEach(item=>item.classList.toggle('selected',item===button));selectedWritingTone=button.dataset.tone;}));
+const writingPreferenceKey=()=> 'lyt_writing_preferences:'+((new URLSearchParams(location.search).get('journal')||'__default__').trim().toLowerCase());
+function loadWritingPreferences(){
+ try{
+  const saved=JSON.parse(localStorage.getItem(writingPreferenceKey())||'{}');
+  const context=document.getElementById('writingContext');
+  if(saved.context&&Array.from(context.options).some(o=>o.value===saved.context))context.value=saved.context;
+  if(saved.tone&&document.querySelector('#writingTones .tone-button[data-tone="'+CSS.escape(saved.tone)+'"]'))selectedWritingTone=saved.tone;
+  document.querySelectorAll('#writingTones .tone-button').forEach(item=>item.classList.toggle('selected',item.dataset.tone===selectedWritingTone));
+ }catch(e){console.warn('writing preferences load failed',e)}
+}
+function saveWritingPreferences(){
+ try{localStorage.setItem(writingPreferenceKey(),JSON.stringify({context:document.getElementById('writingContext').value,tone:selectedWritingTone}));}catch(e){console.warn('writing preferences save failed',e)}
+}
+document.querySelectorAll('#writingTones .tone-button').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('#writingTones .tone-button').forEach(item=>item.classList.toggle('selected',item===button));selectedWritingTone=button.dataset.tone;saveWritingPreferences();}));
+document.getElementById('writingContext').addEventListener('change',saveWritingPreferences);
+loadWritingPreferences();
 function makeLocalDraft(rawKeywords, context, tone){
  const raw=rawKeywords.split(/[,，、;；\n]+/).map(x=>x.trim().replace(/^[#＃]+/,'')).filter(Boolean);
  const seen=new Set(), words=raw.filter(w=>{const k=w.toLowerCase();if(seen.has(k))return false;seen.add(k);return true}).slice(0,10);
