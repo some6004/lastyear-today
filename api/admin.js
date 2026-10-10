@@ -38,6 +38,29 @@ module.exports = async function handler(req, res) {
       res.setHeader('Set-Cookie', COOKIE + '=' + encodeURIComponent(token) + '; HttpOnly; Secure; SameSite=Strict; Path=/api/admin; Max-Age=' + Math.floor(MAX_AGE / 1000));
       return res.status(200).json({ ok: true });
     }
+    if (req.method === 'POST' && req.body && req.body.action === 'update_member') {
+      if (!isAdmin(req)) return res.status(401).json({ error: '관리자 로그인이 필요합니다.' });
+      const body = req.body;
+      const userId = String(body.user_id || '').trim();
+      const name = String(body.name || '').trim();
+      const nickname = String(body.nickname || '').trim();
+      const birthDate = String(body.birth_date || '').trim();
+      const phone = String(body.phone || '').replace(/[\\s-]/g, '');
+      if (!userId || !name || name.length > 80) return res.status(400).json({ error: '회원 이름을 확인해 주세요.' });
+      if (!nickname || nickname.length > 40) return res.status(400).json({ error: '대화명을 1~40자로 입력해 주세요.' });
+      if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(birthDate) || Number.isNaN(Date.parse(birthDate))) return res.status(400).json({ error: '생년월일을 YYYY-MM-DD 형식으로 입력해 주세요.' });
+      if (!/^\\+?\\d{9,15}$/.test(phone)) return res.status(400).json({ error: '전화번호를 확인해 주세요.' });
+      const db = getPool();
+      const authUser = await db.query('SELECT id::text AS id, email FROM neon_auth."user" WHERE id::text=$1 LIMIT 1', [userId]);
+      if (!authUser.rows.length) return res.status(404).json({ error: '회원을 찾을 수 없습니다.' });
+      await db.query('UPDATE neon_auth."user" SET name=$2, "updatedAt"=now() WHERE id::text=$1', [userId, name]);
+      const username = String(authUser.rows[0].email || '').split('@')[0].toLowerCase();
+      await db.query(`INSERT INTO public.lyt_profiles (user_id, username, display_name, nickname, birth_date, phone, updated_at)
+        VALUES ($1,$2,$3,$4,$5::date,$6,now())
+        ON CONFLICT (user_id) DO UPDATE SET display_name=EXCLUDED.display_name, nickname=EXCLUDED.nickname, birth_date=EXCLUDED.birth_date, phone=EXCLUDED.phone, updated_at=now()`,
+        [userId, username, name, nickname, birthDate, phone]);
+      return res.status(200).json({ ok: true });
+    }
     if (req.method === 'DELETE') {
       res.setHeader('Set-Cookie', COOKIE + '=; HttpOnly; Secure; SameSite=Strict; Path=/api/admin; Max-Age=0');
       return res.status(200).json({ ok: true });
