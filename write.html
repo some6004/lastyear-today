@@ -25,7 +25,7 @@
 <a class="mobile-memory-preview" href="#memory"><div class="mobile-memory-thumb" id="mobileMemoryThumb"></div><div class="mobile-memory-copy"><div class="mobile-memory-kicker">ONE YEAR AGO</div><strong>작년, 오늘</strong><span id="mobileMemoryDate">2025. 10. 09</span><p id="mobileMemoryText">아침부터 현장에 나가 정신없이 하루를 보냈다.</p></div><span class="mobile-memory-arrow">↓</span></a>
 <section class="editor">
 <div><input class="date-select" id="date" type="date" aria-label="기록 날짜"></div>
-<div class="write-layout"><div class="writing-area"><div class="keyword-writer"><div class="keyword-label"><span>키워드로 글쓰기</span><small>단어 몇 개로 초안 만들기</small></div><input id="writingKeywords" class="keyword-input" type="text" maxlength="240" placeholder="예: 아이 첫걸음, 공원 산책, 뿌듯했던 하루"><div class="keyword-options"><label class="keyword-select-label" for="writingContext">기록의 성격</label><select id="writingContext" class="keyword-length" aria-label="기록의 성격"><option value="일상">일상</option><option value="육아">육아</option><option value="여행">여행</option><option value="업무">업무</option><option value="가족">가족</option><option value="연애·관계">연애·관계</option><option value="건강·운동">건강·운동</option><option value="취미">취미</option><option value="기타">기타</option></select></div><div class="keyword-tone-wrap"><div class="keyword-select-label">문체</div><div class="keyword-tones" id="writingTones"><button type="button" class="tone-button selected" data-tone="담백하게">담백하게</button><button type="button" class="tone-button" data-tone="감성적으로">감성적으로</button><button type="button" class="tone-button" data-tone="밝고 유쾌하게">밝고 유쾌하게</button><button type="button" class="tone-button" data-tone="딱딱한 업무톤">딱딱한 업무톤</button><button type="button" class="tone-button" data-tone="다정하게">다정하게</button><button type="button" class="tone-button" data-tone="유머러스하게">유머러스하게</button></div></div><div class="keyword-tools"><span id="keywordUsageCount" class="keyword-usage">무료 · 무제한 생성</span><button id="generateDraftBtn" class="keyword-generate" type="button" onclick="generateKeywordDraft()">문장 생성</button></div><div id="keywordDraftStatus" style="font-size:11px;color:var(--faint);margin-top:9px" aria-live="polite">키워드를 3~4개 적고 문장 생성을 눌러 주세요. 하루 10회까지 이용할 수 있어요.</div><div id="keywordDraftPreview" class="keyword-preview"></div><div id="keywordDraftActions" class="keyword-actions" style="display:none"><button type="button" onclick="useKeywordDraft(false)">글 뒤에 붙이기</button><button type="button" onclick="useKeywordDraft(true)">본문으로 사용</button></div></div><textarea id="content" placeholder="오늘의 하루를 천천히 적어보세요.
+<div class="write-layout"><div class="writing-area"><div class="keyword-writer"><div class="keyword-label"><span>키워드로 글쓰기</span><small>단어 몇 개로 초안 만들기</small></div><input id="writingKeywords" class="keyword-input" type="text" maxlength="240" placeholder="예: 아이 첫걸음, 공원 산책, 뿌듯했던 하루"><div class="keyword-options"><label class="keyword-select-label" for="writingContext">기록의 성격</label><select id="writingContext" class="keyword-length" aria-label="기록의 성격"><option value="일상">일상</option><option value="육아">육아</option><option value="여행">여행</option><option value="업무">업무</option><option value="가족">가족</option><option value="연애·관계">연애·관계</option><option value="건강·운동">건강·운동</option><option value="취미">취미</option><option value="기타">기타</option></select></div><div class="keyword-tone-wrap"><div class="keyword-select-label">문체</div><div class="keyword-tones" id="writingTones"><button type="button" class="tone-button selected" data-tone="담백하게">담백하게</button><button type="button" class="tone-button" data-tone="감성적으로">감성적으로</button><button type="button" class="tone-button" data-tone="밝고 유쾌하게">밝고 유쾌하게</button><button type="button" class="tone-button" data-tone="딱딱한 업무톤">딱딱한 업무톤</button><button type="button" class="tone-button" data-tone="다정하게">다정하게</button><button type="button" class="tone-button" data-tone="유머러스하게">유머러스하게</button></div></div><div class="keyword-tools"><span id="keywordUsageCount" class="keyword-usage">무료 · 무제한 생성</span><button id="generateDraftBtn" class="keyword-generate" type="button" onclick="generateKeywordDraft()">문장 생성</button></div><div id="keywordDraftStatus" style="font-size:11px;color:var(--faint);margin-top:9px" aria-live="polite">키워드 2개 이상을 쉼표로 구분해 적어 주세요. 무료로 횟수 제한 없이 만들 수 있어요.</div><div id="keywordDraftPreview" class="keyword-preview"></div><div id="keywordDraftActions" class="keyword-actions" style="display:none"><button type="button" onclick="useKeywordDraft(false)">글 뒤에 붙이기</button><button type="button" onclick="useKeywordDraft(true)">본문으로 사용</button></div></div><textarea id="content" placeholder="오늘의 하루를 천천히 적어보세요.
 
 무슨 일이 있었는지,
 어떤 생각을 했는지,
@@ -96,41 +96,84 @@ function showToast(message){const t=document.getElementById('toast');t.textConte
 let keywordDraftText='';let selectedWritingTone='담백하게';
 document.querySelectorAll('#writingTones .tone-button').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('#writingTones .tone-button').forEach(item=>item.classList.toggle('selected',item===button));selectedWritingTone=button.dataset.tone;}));
 function makeLocalDraft(rawKeywords, context, tone){
- const words=rawKeywords.split(/[,，、;；\n]+/).map(x=>x.trim()).filter(Boolean).slice(0,12);
+ const raw=rawKeywords.split(/[,，、;；\n]+/).map(x=>x.trim().replace(/^[#＃]+/,'')).filter(Boolean);
+ const seen=new Set(), words=raw.filter(w=>{const k=w.toLowerCase();if(seen.has(k))return false;seen.add(k);return true}).slice(0,10);
  if(!words.length)return '';
- const joined=words.join(', ');
- const hasFeeling=/(기쁨|행복|뿌듯|감사|설렘|걱정|속상|슬픔|힘들|즐거움|재미|감동|아쉬움|긴장|후회|만족|평온)/.test(joined);
- const hasPlace=/(공원|바다|여행|집|회사|학교|현장|카페|식당|병원|산책|캠핑|해외|제주|산|시장)/.test(joined);
- const hasAction=/(만났|먹었|다녀왔|갔|왔|시작|마쳤|완성|배웠|만들|구경|산책|운동|공부|출근|퇴근|여행|정리|구입|샀|축하|대화|촬영|방문)/.test(joined);
- const contextOpeners={
-  '육아':'아이와 함께한 순간을 돌아보니','여행':'오늘의 여행을 떠올리니','업무':'오늘 업무를 정리해 보니','가족':'가족과 함께한 시간을 돌아보니','연애·관계':'함께 나눈 시간을 돌아보니','건강·운동':'오늘의 건강과 운동을 돌아보니','취미':'좋아하는 일에 집중한 오늘은','일상':'오늘 하루를 돌아보니','기타':'오늘의 기록을 돌아보니'
+ const groups={
+  people:/(아이|아들|딸|아내|남편|엄마|아빠|부모님|친구|동료|가족|선생님|사람|팀원|고객|담당자|반려견|강아지|고양이)/,
+  place:/(집|회사|현장|학교|공원|바다|산|카페|식당|병원|시장|여행지|제주|사무실|공항|호텔|길|정원|캠핑장)/,
+  action:/(산책|여행|출근|퇴근|회의|작업|공사|운동|공부|요리|식사|점심|저녁|아침|대화|만남|방문|정리|청소|구입|쇼핑|촬영|축하|생일|졸업|시작|마무리|완성|연습|독서|휴식|드라이브|데이트|놀이|등원|하원|첫걸음)/,
+  feeling:/(기쁨|행복|뿌듯|감사|설렘|걱정|속상|슬픔|힘듦|힘들|즐거움|재미|감동|아쉬움|긴장|후회|만족|평온|피곤|답답|뭉클|편안|그리움|자랑스러움|웃음|감정)/,
+  time:/(아침|오전|점심|오후|저녁|밤|새벽|주말|휴일|월요일|화요일|수요일|목요일|금요일|토요일|일요일|봄|여름|가을|겨울|비 오는 날|첫날|마지막 날)/
  };
- const opener=contextOpeners[context]||contextOpeners['일상'];
- let first='';
- if(context==='업무') first='오늘은 '+joined+' 관련 업무를 중심으로 하루를 보냈다.';
- else if(context==='육아') first='오늘은 '+joined+'과 관련된 순간들이 기억에 남는다.';
- else if(context==='여행') first='오늘은 '+joined+'이(가) 여행의 기억으로 남았다.';
- else if(context==='가족') first='오늘은 '+joined+'과 함께한 시간이 마음에 남았다.';
- else first='오늘은 '+joined+'이(가) 기억에 남는 하루였다.';
- let second=hasFeeling?'돌아보니 그 순간의 감정까지 오래 기억하고 싶은 날이다.':hasPlace?'익숙하거나 새로운 풍경 속에서 잠시 멈춰 하루를 돌아볼 수 있었다.':hasAction?'크고 작은 일을 하나씩 겪으며 하루를 채워 갔다.':'이 키워드들을 기록해 두니 오늘의 장면이 조금 더 선명해진다.';
- const endings={
-  '담백하게':['하루의 흐름을 차분히 정리해 두었다.','이 순간을 오늘의 기록으로 남겨 둔다.'],
-  '감성적으로':['평범한 순간도 시간이 지나면 소중한 기억이 될 것 같다.','오늘의 마음과 장면을 오래 간직하고 싶다.'],
-  '밝고 유쾌하게':['이런 날도 있어야 하루가 더 재미있는 법이다.','덕분에 오늘도 나름 알찬 하루를 보냈다.'],
-  '딱딱한 업무톤':['관련 내용을 기록했으며, 추후 확인할 수 있도록 정리했다.','오늘 진행한 사항을 기록으로 남겼다.'],
-  '다정하게':['이런 순간들을 하나씩 모아 두고 싶다.','오늘도 수고한 나에게 작은 칭찬을 건네고 싶다.'],
-  '유머러스하게':['돌아보면 오늘도 나름 이야깃거리가 생겼다.','언젠가 이 기록을 읽으며 웃을지도 모르겠다.']
+ const picked={};Object.keys(groups).forEach(k=>picked[k]=words.filter(w=>groups[k].test(w)));
+ const rest=words.filter(w=>!Object.values(picked).some(arr=>arr.includes(w)));
+ const pick=(arr,n=0)=>arr.length?arr[((n%arr.length)+arr.length)%arr.length]:'';
+ const joinKo=arr=>arr.length===1?arr[0]:arr.length===2?arr[0]+'와 '+arr[1]:arr.slice(0,-1).join(', ')+' 그리고 '+arr[arr.length-1];
+ const particle=(word,type)=>{
+  const last=word.trim().slice(-1);const code=last.charCodeAt(0);
+  const hasBatchim=code>=0xAC00&&code<=0xD7A3&&(code-0xAC00)%28!==0;
+  if(type==='은는')return hasBatchim?'은':'는';
+  if(type==='이가')return hasBatchim?'이':'가';
+  if(type==='을를')return hasBatchim?'을':'를';
+  if(type==='과와')return hasBatchim?'과':'와';
+  return '';
  };
- const endLine=(endings[tone]||endings['담백하게'])[words.length%2];
- if(words.length===1) first='오늘은 '+words[0]+'이(가) 유난히 기억에 남았다.';
- if(words.length>=3) second=hasFeeling?'여러 순간이 이어지며 마음에 다양한 감정이 남았다.':hasPlace?'장소와 장면이 어우러져 오늘만의 기억이 만들어졌다.':'서로 이어진 순간들을 이렇게 기록으로 남겨 둔다.';
- if(tone==='딱딱한 업무톤'){first= context==='업무'?'금일 '+joined+' 관련 내용을 확인하고 기록했다.':'금일 '+joined+' 관련 사항을 기록했다.';second='향후 참고할 수 있도록 주요 내용을 정리했다.';}
- else if(tone==='감성적으로'){first='오늘은 '+joined+'이(가) 마음에 오래 머물렀다.';second=hasFeeling?'그때 느꼈던 마음까지 잊지 않도록 이 순간을 기록해 둔다.':'지나고 나면 사소해 보일 순간도 오늘의 나에게는 의미가 있다.';}
- else if(tone==='밝고 유쾌하게'){first='오늘의 키워드는 '+joined+'!';second='이런저런 순간이 모여 제법 괜찮은 하루가 완성됐다.';}
- else if(tone==='다정하게'){first='오늘은 '+joined+'과 관련된 순간을 마음에 담아 두었다.';second='하루를 잘 보내느라 애쓴 나에게도 따뜻한 마음을 건네고 싶다.';}
- else if(tone==='유머러스하게'){first='오늘을 한마디로 정리하면 '+joined+'이다.';second='하루가 끝나고 보니 이것도 꽤 괜찮은 에피소드가 될 것 같다.';}
- if(words.length<=2)return first+' '+endLine;
- return first+' '+second;
+ const addTopic=(word)=>word+particle(word,'은는');
+ const topicList=joinKo(words);
+ const place=pick(picked.place),people=pick(picked.people),action=pick(picked.action),feeling=pick(picked.feeling),time=pick(picked.time);
+ const extras=rest.slice(0,3);
+ let lead='',middle='',close='';
+ const openers={
+  '일상':['오늘 하루를 돌아보면','오늘은 유난히','하루를 마무리하며 떠올려 보니'],
+  '육아':['아이와 보낸 오늘을 돌아보니','오늘 아이와 함께한 시간에는','아이의 하루를 곁에서 지켜보며'],
+  '여행':['오늘 여행에서 기억에 남는 건','오늘의 여행을 돌아보면','낯선 곳에서 보낸 오늘은'],
+  '업무':['오늘 업무에서 기억해 둘 내용은','오늘은 업무와 관련해','하루 동안 진행한 일을 정리해 보니'],
+  '가족':['가족과 보낸 오늘을 떠올리면','오늘 함께한 시간 중에는','가족과 나눈 오늘의 순간은'],
+  '연애·관계':['오늘 함께한 시간을 돌아보면','서로 나눈 이야기를 떠올리니','오늘은 관계에 대해 다시 생각하게 되는 날이었다.'],
+  '건강·운동':['오늘 몸과 마음의 상태를 돌아보면','오늘은 건강을 위해','하루의 리듬을 돌아보니'],
+  '취미':['오늘 좋아하는 일에 시간을 내어 보니','취미와 함께한 오늘은','오늘은 내가 좋아하는 것에 집중했다.'],
+  '기타':['오늘을 돌아보면','오늘 기록해 두고 싶은 건','하루가 지나고 나니']
+ };
+ const openerList=openers[context]||openers['일상'];
+ const opener=pick(openerList,words.length);
+ if(tone==='딱딱한 업무톤'){
+  lead=(context==='업무'?'금일 ':'오늘 ')+topicList+' 관련 사항을 확인하고 기록했다.';
+  middle=place?'장소는 '+place+'이며, 관련 내용을 정리했다.':'주요 키워드를 기준으로 내용을 정리했다.';
+  close='추후 경과를 확인할 수 있도록 기록을 남겼다.';
+ }else if(tone==='감성적으로'){
+  lead=opener+' '+topicList+'이(가) 마음에 남았다.';
+  middle=feeling?'특히 '+feeling+'의 감정이 쉽게 사라지지 않을 것 같다.':place?place+'에서 마주한 장면을 오래 기억하고 싶다.':'지나고 나면 사소해 보일 순간도 지금의 나에게는 의미가 있다.';
+  close='오늘의 장면과 마음을 잊지 않도록 이곳에 적어 둔다.';
+ }else if(tone==='밝고 유쾌하게'){
+  lead='오늘의 키워드는 '+topicList+'!';
+  middle=action?'특히 '+action+'까지 더해져 제법 알찬 하루였다.':people?people+'와 함께해 더 즐거운 시간이었다.':'이런저런 일이 모여 오늘도 나름 꽉 찬 하루가 됐다.';
+  close='나중에 다시 읽으면 오늘의 기분까지 떠오르길!';
+ }else if(tone==='다정하게'){
+  lead=opener+' '+topicList+'을(를) 마음에 담아 두었다.';
+  middle=people?people+'와 함께한 순간이 고맙게 느껴졌다.':feeling?'오늘 느낀 '+feeling+'의 마음도 있는 그대로 받아들이기로 했다.':'잘 해낸 일도, 조금 아쉬운 일도 오늘의 나를 만든 순간이다.';
+  close='오늘도 애쓴 나에게 따뜻한 마음을 건네며 하루를 마친다.';
+ }else if(tone==='유머러스하게'){
+  lead='오늘을 요약하면 '+topicList+' 정도로 정리할 수 있겠다.';
+  middle=action?'그 와중에 '+action+'까지 해냈으니 나름 바쁜 하루였다.':'평범하게 흘러갈 줄 알았는데, 기록할 만한 이야기는 생겼다.';
+  close='미래의 내가 이 글을 읽고 피식 웃어 주면 좋겠다.';
+ }else{
+  lead=opener+' '+topicList+'이(가) 기억에 남는다.';
+  middle=place?place+'에서 '+(action?action+'하며 ':'')+'시간을 보냈다.':action?'오늘은 '+action+'을(를) 하며 하루를 보냈다.':people?people+'와 관련된 순간이 기억에 남았다.':feeling?'오늘은 '+feeling+' 마음이 들기도 했다.':'여러 순간이 이어지며 하루가 지나갔다.';
+  close=feeling?'그때의 '+feeling+' 마음도 함께 기억해 두고 싶다.':'나중에 다시 떠올릴 수 있도록 오늘의 일을 기록해 둔다.';
+ }
+ if(words.length===1){
+  const one=words[0];
+  if(tone==='딱딱한 업무톤')return '오늘은 '+one+' 관련 내용을 기록했다. 추후 참고할 수 있도록 남겨 둔다.';
+  if(tone==='감성적으로')return '오늘은 '+one+'이(가) 마음에 오래 머물렀다. 지나고 나면 이 순간도 소중한 기억이 될 것 같다.';
+  return '오늘은 '+one+'이(가) 기억에 남았다. 이 순간을 잊지 않도록 기록해 둔다.';
+ }
+ if(words.length===2){
+  if(tone==='담백하게')return '오늘은 '+words[0]+'와 '+words[1]+'이(가) 기억에 남았다. 하루를 돌아보며 이 순간을 기록해 둔다.';
+  return lead+' '+close;
+ }
+ if(extras.length&&words.length>=4&&tone==='담백하게')middle+=' '+extras.slice(0,2).join('와 ')+'도 함께 기억해 둔다.';
+ return [lead,middle,close].filter(Boolean).join(' ');
 }
 function generateKeywordDraft(){
  const keywords=document.getElementById('writingKeywords').value.trim();
