@@ -2,7 +2,7 @@ const { getPool, sendError } = require('./_db');
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 function validDate(value) {
-  if (typeof value !== 'string' || !/^\\d{4}-\\d{2}-\\d{2}$/.test(value)) return false;
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const d = new Date(value + 'T00:00:00Z');
   return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value;
 }
@@ -15,8 +15,8 @@ function clean(body) {
   const metadata = body.metadata && typeof body.metadata === 'object' && !Array.isArray(body.metadata) ? body.metadata : {};
   const image = typeof metadata.imageDataUrl === 'string' ? metadata.imageDataUrl : '';
   const imageUrl = typeof metadata.imageUrl === 'string' ? metadata.imageUrl : '';
-  if (image && (!/^data:image\\/(jpeg|png|webp);base64,/.test(image) || image.length > 3500000)) { const e = new Error('사진은 2.5MB 이하로 올려 주세요.'); e.status = 400; throw e; }
-  if (imageUrl && (!/^https:\\/\\//i.test(imageUrl) || imageUrl.length > 2000)) { const e = new Error('사진 주소를 확인해 주세요.'); e.status = 400; throw e; }
+  if (image && (!/^data:image\/(jpeg|png|webp);base64,/.test(image) || image.length > 3500000)) { const e = new Error('사진은 2.5MB 이하로 올려 주세요.'); e.status = 400; throw e; }
+  if (imageUrl && (!/^https:\/\//i.test(imageUrl) || imageUrl.length > 2000)) { const e = new Error('사진 주소를 확인해 주세요.'); e.status = 400; throw e; }
   return { entry_date, title, content, visibility: ['private','public','unlisted'].includes(body.visibility) ? body.visibility : 'private', metadata };
 }
 function safe(row) {
