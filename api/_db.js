@@ -34,13 +34,28 @@ async function requireUser(req) {
     const id = typeof payload.sub === 'string' ? payload.sub : '';
     if (!id) throw new Error('Missing subject');
     const db = getPool();
-    const account = await db.query("SELECT withdrawal_status FROM public.lyt_profiles WHERE user_id=$1 LIMIT 1", [id]);
-    if (account.rows[0] && account.rows[0].withdrawal_status === 'pending') {
+    // Check withdrawal status and update activity in one database round trip.
+    const state = await db.query(`
+      WITH account AS (
+        SELECT withdrawal_status FROM public.lyt_profiles WHERE user_id = $1 LIMIT 1
+      ),
+      activity AS (
+        INSERT INTO public.lyt_user_activity(user_id,last_seen_at,total_seconds,updated_at)
+        SELECT $1, now(), 0, now()
+        WHERE COALESCE((SELECT withdrawal_status FROM account), '') <> 'pending'
+        ON CONFLICT(user_id) DO UPDATE SET
+          total_seconds = public.lyt_user_activity.total_seconds +
+            LEAST(300, GREATEST(0, FLOOR(EXTRACT(EPOCH FROM (now()-public.lyt_user_activity.last_seen_at)))::bigint)),
+          last_seen_at = now(), updated_at = now()
+        RETURNING user_id
+      )
+      SELECT withdrawal_status FROM account
+    `, [id]);
+    if (state.rows[0] && state.rows[0].withdrawal_status === 'pending') {
       const error = new Error('회원 탈퇴가 접수된 계정입니다. 탈퇴 철회가 필요하면 1:1 문의로 관리자에게 요청해 주세요.');
       error.status = 403;
       throw error;
     }
-    await db.query("INSERT INTO public.lyt_user_activity(user_id,last_seen_at,total_seconds,updated_at) VALUES($1,now(),0,now()) ON CONFLICT(user_id) DO UPDATE SET total_seconds=public.lyt_user_activity.total_seconds + LEAST(300,GREATEST(0,FLOOR(EXTRACT(EPOCH FROM (now()-public.lyt_user_activity.last_seen_at)))::bigint)), last_seen_at=now(),updated_at=now()", [id]);
     return { id, email: typeof payload.email === 'string' ? payload.email : undefined };
   } catch (cause) {
     if (cause && cause.status === 403) throw cause;
