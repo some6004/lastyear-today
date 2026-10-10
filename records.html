@@ -8,22 +8,83 @@
 <body><div class="page">
 <header class="top"><a class="logo" href="index.html" aria-label="작년, 오늘"><span>작</span><span>년</span><span>,</span><span> 오늘</span></a><nav class="nav"><a href="write.html">기록하기</a><a href="index.html">돌아가기</a></nav></header>
 <main class="main">
-<section class="intro"><div><div class="eyebrow">MY RECORDS</div><h1 class="title">나의 기록</h1></div><p>지나온 시간을 한눈에 바라보세요.<br>기록을 남긴 날에는 그날의 장면이 달력에 남습니다.</p></section>
+<section class="intro"><div><div class="eyebrow">MY RECORDS</div><h1 class="title">나의 기록</h1></div><p id="recordsStatus">저장된 기록을 불러오는 중…</p></section>
 <section class="calendar"><div class="calendar-head"><div><div class="month" id="monthLabel"></div><div class="years" id="years"></div></div><div class="arrows"><button class="arrow" type="button" onclick="changeMonth(-1)">← 이전</button><button class="arrow" type="button" onclick="changeMonth(1)">다음 →</button></div></div>
 <div class="week"><div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div></div><div class="grid" id="calendar"></div></section>
 <section class="detail" id="detail"><div class="detail-date" id="detailDate">날짜를 선택하세요</div><div><h2 class="detail-title" id="detailTitle">기록이 있는 날을 눌러보세요.</h2><div class="detail-text" id="detailText">달력의 썸네일을 누르면 그날의 기록이 아래에 나타납니다.</div><img class="detail-image" id="detailImage" alt="선택한 기록의 이미지"></div></section>
 </main><footer class="footer"><span>© 2026 작년, 오늘</span><span>나의 모든 기록을 기억하는 개인 AI 아카이브</span></footer></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 <script>
-const records={
-"2026-10-2":{title:"오늘도 현장에서",text:"바쁘게 하루를 보냈다. 해야 할 일이 많았지만 하나씩 정리해 나갔다.",image:"https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=900&q=80"},
-"2026-10-5":{title:"조금은 느린 하루",text:"오랜만에 가족과 시간을 보냈다. 별것 아닌 순간들이 오래 기억에 남을 것 같다.",image:"https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=900&q=80"},
-"2026-10-8":{title:"가을이 왔다",text:"아침 공기가 달라졌다. 계절이 바뀌는 걸 느낀 하루.",image:"https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80"},
-"2026-10-9":{title:"오늘의 기록",text:"오늘도 새로운 하루를 기록한다. 이 기록이 내년 오늘 다시 돌아오기를.",image:"https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=900&q=80"}};
-let view=new Date(2026,9,1);
-const cal=document.getElementById('calendar'),label=document.getElementById('monthLabel'),years=document.getElementById('years');
-function key(y,m,d){return y+"-"+(m+1)+"-"+d}
-function render(){const y=view.getFullYear(),m=view.getMonth();years.innerHTML="";for(let yy=y+2;yy>=y-2;yy--){const b=document.createElement("button");b.className="year"+(yy===y?" active":"");b.textContent=yy;b.onclick=()=>{view.setFullYear(yy);render()};years.appendChild(b)}label.innerHTML=y+'년 <small>'+['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'][m]+'</small>';cal.innerHTML='';const first=new Date(y,m,1).getDay(),last=new Date(y,m+1,0).getDate();for(let i=0;i<first;i++){const e=document.createElement('div');e.className='day empty';cal.appendChild(e)}for(let d=1;d<=last;d++){const el=document.createElement('div');el.className='day';const k=key(y,m,d),r=records[k];el.innerHTML='<span class="num">'+d+'</span>'+(r?'<span class="mark"></span><div class="thumb" style="background-image:url(\''+r.image+'\')"></div>':'');if(k==='2026-10-9')el.classList.add('today');if(r)el.onclick=()=>showRecord(k,r);cal.appendChild(el)}}
-function showRecord(k,r){document.getElementById('detailDate').textContent=k.replaceAll('-','.');document.getElementById('detailTitle').textContent=r.title;document.getElementById('detailText').textContent=r.text;const img=document.getElementById('detailImage');img.src=r.image;img.style.display='block';document.getElementById('detail').scrollIntoView({behavior:'smooth',block:'start'})}
-function changeMonth(n){view.setMonth(view.getMonth()+n);render()}
+const records = Object.create(null);
+let view = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+const cal = document.getElementById('calendar');
+const label = document.getElementById('monthLabel');
+const years = document.getElementById('years');
+const statusEl = document.getElementById('recordsStatus');
+const monthNames = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+function dateKey(y,m,d){return y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0')}
+function imageFor(r){return r && r.metadata ? (r.metadata.imageDataUrl || r.metadata.imageUrl || '') : ''}
+function render(){
+ const y=view.getFullYear(),m=view.getMonth();
+ years.innerHTML='';
+ for(let yy=y+2;yy>=y-2;yy--){
+  const b=document.createElement('button');b.className='year'+(yy===y?' active':'');b.textContent=yy;
+  b.onclick=()=>{view=new Date(yy,view.getMonth(),1);render()};years.appendChild(b);
+ }
+ label.innerHTML=y+'년 <small>'+monthNames[m]+'</small>';
+ cal.innerHTML='';
+ const first=new Date(y,m,1).getDay(),last=new Date(y,m+1,0).getDate();
+ for(let i=0;i<first;i++){const e=document.createElement('div');e.className='day empty';cal.appendChild(e)}
+ for(let d=1;d<=last;d++){
+  const el=document.createElement('div');el.className='day';
+  const k=dateKey(y,m,d),r=records[k],img=imageFor(r);
+  const num=document.createElement('span');num.className='num';num.textContent=d;el.appendChild(num);
+  if(k===dateKey(new Date().getFullYear(),new Date().getMonth(),new Date().getDate()))el.classList.add('today');
+  if(r){
+   const mark=document.createElement('span');mark.className='mark';el.appendChild(mark);
+   if(img){const thumb=document.createElement('div');thumb.className='thumb';thumb.style.backgroundImage='url("'+img.replace(/"/g,'%22')+'")';el.appendChild(thumb)}
+   el.onclick=()=>showRecord(k,r);
+   el.setAttribute('role','button');el.setAttribute('tabindex','0');
+   el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showRecord(k,r)}};
+  }
+  cal.appendChild(el);
+ }
+}
+function showRecord(k,r){
+ document.getElementById('detailDate').textContent=k.replaceAll('-','.');
+ document.getElementById('detailTitle').textContent=r.title||'제목 없는 기록';
+ document.getElementById('detailText').textContent=r.content||'';
+ const img=document.getElementById('detailImage'),src=imageFor(r);
+ if(src){img.src=src;img.style.display='block'}else{img.removeAttribute('src');img.style.display='none'}
+ document.getElementById('detail').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function changeMonth(n){view=new Date(view.getFullYear(),view.getMonth()+n,1);render()}
+async function loadRecords(){
+ try{
+  const client=window.supabase.createClient(window.LYT_SUPABASE_URL,window.LYT_SUPABASE_KEY);
+  const {data:{session},error}=await client.auth.getSession();
+  if(error)throw error;
+  if(!session?.access_token){
+   statusEl.innerHTML='내 기록을 보려면 <a href="login.html" style="color:inherit;text-decoration:underline">로그인</a>해 주세요. 기록은 로그인한 본인에게만 표시됩니다.';
+   render();return;
+  }
+  statusEl.textContent='저장된 기록을 불러오는 중…';
+  const response=await fetch('/api/entries',{headers:{Authorization:'Bearer '+session.access_token}});
+  const result=await response.json();
+  if(!response.ok)throw new Error(result.error||'기록을 불러오지 못했습니다.');
+  (result.entries||[]).forEach(r=>{
+   const k=String(r.entry_date).slice(0,10);
+   if(!records[k])records[k]=r;
+  });
+  statusEl.textContent=Object.keys(records).length?'저장된 기록 '+Object.keys(records).length+'개':'아직 저장된 기록이 없습니다. 기록하기에서 첫 기록을 남겨보세요.';
+  render();
+ }catch(e){
+  console.error('records load failed',e);
+  statusEl.textContent='기록을 불러오지 못했습니다. 로그인 상태와 서버 연결을 확인해 주세요.';
+  render();
+ }
+}
 render();
+loadRecords();
 </script></body></html>
