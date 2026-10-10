@@ -126,7 +126,7 @@ module.exports = async function handler(req, res) {
         WHERE e.deleted_at IS NULL ORDER BY e.entry_date DESC, e.updated_at DESC LIMIT 100`),
       db.query(`SELECT i.id,i.name,i.email,i.subject,i.status,i.created_at,i.updated_at,
         (SELECT m.message FROM public.lyt_inquiry_messages m WHERE m.inquiry_id=i.id AND m.sender_type='customer' ORDER BY m.created_at ASC LIMIT 1) AS initial_message,
-        (SELECT COUNT(*)::int FROM public.lyt_inquiry_messages m WHERE m.inquiry_id=i.id) AS message_count
+        (SELECT COUNT(*)::int FROM public.lyt_inquiry_messages m WHERE m.inquiry_id=i.id) AS message_count, (SELECT COALESCE(json_agg(json_build_object('sender_type',m.sender_type,'sender_name',m.sender_name,'message',m.message,'created_at',m.created_at) ORDER BY m.created_at ASC),'[]'::json) FROM public.lyt_inquiry_messages m WHERE m.inquiry_id=i.id) AS messages
         FROM public.lyt_inquiries i ORDER BY CASE WHEN i.status='open' THEN 0 ELSE 1 END, i.updated_at DESC LIMIT 300`)
     ]);
     return res.status(200).json({
