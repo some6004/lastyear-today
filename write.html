@@ -56,7 +56,7 @@
 <script src="supabase-config.js"></script>
 <script>
 const writeAuthClient=window.supabase.createClient(window.LYT_SUPABASE_URL,window.LYT_SUPABASE_KEY);
-window.LYT_selectedImage='';
+window.LYT_selectedImage='';window.LYT_selectedImageUrl='';
 async function saveEntryToNeon(payload){
  const {data:{session},error}=await writeAuthClient.auth.getSession();
  if(error)throw error;
@@ -68,7 +68,7 @@ async function saveEntryToNeon(payload){
 }
 const d=document.getElementById('date'),now=new Date();
 const imageSets={default:[['하루의 기록','https://images.unsplash.com/photo-1499209974431-9dddcece7f88?auto=format&fit=crop&w=700&q=80'],['조용한 순간','https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=700&q=80'],['오늘의 풍경','https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=700&q=80']],work:[['일하는 하루','https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=700&q=80'],['현장의 시간','https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=700&q=80'],['퇴근 무렵','https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=700&q=80']],family:[['함께한 시간','https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=700&q=80'],['따뜻한 하루','https://images.unsplash.com/photo-1472162072942-cd5147eb3902?auto=format&fit=crop&w=700&q=80'],['우리의 순간','https://images.unsplash.com/photo-1494386346843-e12284507169?auto=format&fit=crop&w=700&q=80']],travel:[['떠나는 날','https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=700&q=80'],['여행의 풍경','https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=700&q=80'],['낯선 곳','https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=700&q=80']],nature:[['오늘의 자연','https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=700&q=80'],['햇살','https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?auto=format&fit=crop&w=700&q=80'],['저녁 풍경','https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=700&q=80']]};
-function recommendImages(text){const t=text.toLowerCase();let key='default';if(/현장|회사|일|업무|공사|회의|출근|퇴근/.test(t))key='work';else if(/아이|가족|아내|남편|엄마|아빠|아들|딸|우리/.test(t))key='family';else if(/여행|바다|호텔|제주|비행기|휴가/.test(t))key='travel';else if(/나무|꽃|산|하늘|비|햇살|바람|숲|공원/.test(t))key='nature';const list=document.getElementById('imageList');list.innerHTML='';imageSets[key].forEach(([label,url])=>{const b=document.createElement('button');b.className='suggested-image';b.type='button';b.title=label;b.innerHTML='<img src="'+url+'" alt="'+label+'"><span>'+label+'</span>';b.onclick=()=>{document.getElementById('status').textContent=label+' 이미지를 선택했습니다.'};list.appendChild(b)});document.getElementById('aiStatus').textContent=text.trim()?'추천 업데이트':'대기 중'}
+function recommendImages(text){const t=text.toLowerCase();let key='default';if(/현장|회사|일|업무|공사|회의|출근|퇴근/.test(t))key='work';else if(/아이|가족|아내|남편|엄마|아빠|아들|딸|우리/.test(t))key='family';else if(/여행|바다|호텔|제주|비행기|휴가/.test(t))key='travel';else if(/나무|꽃|산|하늘|비|햇살|바람|숲|공원/.test(t))key='nature';const list=document.getElementById('imageList');list.innerHTML='';imageSets[key].forEach(([label,url])=>{const b=document.createElement('button');b.className='suggested-image';b.type='button';b.title=label;b.innerHTML='<img src="'+url+'" alt="'+label+'"><span>'+label+'</span>';b.onclick=()=>{window.LYT_selectedImage='';window.LYT_selectedImageUrl=url;document.querySelectorAll('.suggested-image').forEach(x=>x.style.outline='');b.style.outline='2px solid #24231f';document.getElementById('status').textContent=label+' 이미지를 선택했습니다. 저장 버튼을 누르면 기록과 함께 저장됩니다.'};list.appendChild(b)});document.getElementById('aiStatus').textContent=text.trim()?'추천 업데이트':'대기 중'}
 const content=document.getElementById('content');let timer;content.addEventListener('input',()=>{clearTimeout(timer);document.getElementById('aiStatus').textContent='분석 중…';timer=setTimeout(()=>recommendImages(content.value),250)});recommendImages('');const selectedJournal=new URLSearchParams(location.search).get('journal'); if(selectedJournal){document.getElementById('journalContext').textContent='RECORDING · '+selectedJournal;} d.value=now.toISOString().slice(0,10);
 document.getElementById('todayDate').textContent=now.getFullYear()+'. '+String(now.getMonth()+1).padStart(2,'0')+'. '+String(now.getDate()).padStart(2,'0');
 document.getElementById('weekday').textContent=['일요일','월요일','화요일','수요일','목요일','금요일','토요일'][now.getDay()];
@@ -101,7 +101,7 @@ async function saveRecord(){
  const btn=document.querySelector('.save');if(btn)btn.disabled=true;
  status.textContent='Neon 서버에 저장 중…';
  try{
-  await saveEntryToNeon({entry_date:date,title:content.split(/\n/)[0].slice(0,200),content,visibility:document.getElementById('public').checked?'public':'private',metadata:window.LYT_selectedImage?{imageDataUrl:window.LYT_selectedImage}:{}});
+  await saveEntryToNeon({entry_date:date,title:content.split(/\n/)[0].slice(0,200),content,visibility:document.getElementById('public').checked?'public':'private',metadata:window.LYT_selectedImage?{imageDataUrl:window.LYT_selectedImage}:window.LYT_selectedImageUrl?{imageUrl:window.LYT_selectedImageUrl}:{}});
   status.textContent=document.getElementById('public').checked?'공개 기록을 서버에 저장했습니다.':'비공개 기록을 서버에 저장했습니다.';
   showToast('서버에 저장되었습니다.');
  }catch(e){status.textContent=e.message||'저장하지 못했습니다.';showToast('저장 실패')}
@@ -124,7 +124,7 @@ document.getElementById('photo').addEventListener('change',async e=>{
  const file=e.target.files&&e.target.files[0];if(!file)return;
  if(!file.type.startsWith('image/')){document.getElementById('status').textContent='이미지 파일만 선택할 수 있습니다.';return}
  if(file.size>15*1024*1024){document.getElementById('status').textContent='사진은 15MB 이하 파일을 선택해 주세요.';return}
- try{const reader=new FileReader();reader.onload=async()=>{try{window.LYT_selectedImage=await compressImage(reader.result);document.getElementById('status').textContent='사진을 첨부했습니다. 저장 버튼을 누르면 기록과 함께 저장됩니다.'}catch(_){document.getElementById('status').textContent='사진을 처리하지 못했습니다.'}};reader.readAsDataURL(file)}catch(_){document.getElementById('status').textContent='사진을 읽지 못했습니다.'}
+ try{const reader=new FileReader();reader.onload=async()=>{try{window.LYT_selectedImage=await compressImage(reader.result);window.LYT_selectedImageUrl='';document.querySelectorAll('.suggested-image').forEach(x=>x.style.outline='');document.getElementById('status').textContent='사진을 첨부했습니다. 저장 버튼을 누르면 기록과 함께 저장됩니다.'}catch(_){document.getElementById('status').textContent='사진을 처리하지 못했습니다.'}};reader.readAsDataURL(file)}catch(_){document.getElementById('status').textContent='사진을 읽지 못했습니다.'}
 });
 renderMemory();
 </script>
