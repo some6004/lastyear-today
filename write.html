@@ -235,10 +235,10 @@ async function saveRecord(){
  const status=document.getElementById('status');
  if(!content){status.textContent='오늘의 기록을 먼저 입력해 주세요.';document.getElementById('content').focus();return}
  const btn=document.querySelector('.save');if(btn)btn.disabled=true;
- status.textContent='Neon 서버에 저장 중…';
+ status.textContent='작년, 오늘에 소중한 기록을 저장하고 있어요…';
  try{
   await saveEntryToNeon({entry_date:date,journal_name:selectedJournal||'',title:content.split(/\n/)[0].slice(0,200),content,visibility:document.getElementById('public').checked?'public':'private',metadata:window.LYT_selectedImage?{imageDataUrl:window.LYT_selectedImage}:window.LYT_selectedImageUrl?{imageUrl:window.LYT_selectedImageUrl}:{}});
-  status.textContent=document.getElementById('public').checked?'공개 기록을 서버에 저장했습니다.':'비공개 기록을 서버에 저장했습니다.';
+  status.textContent=document.getElementById('public').checked?'공개 기록을 작년, 오늘에 기록을 안전하게 저장했어요.':'비공개 기록을 작년, 오늘에 기록을 안전하게 저장했어요.';
   showToast('서버에 저장되었습니다.');
  }catch(e){status.textContent=e.message||'저장하지 못했습니다.';showToast('저장 실패')}
  finally{if(btn)btn.disabled=false}
@@ -248,10 +248,10 @@ async function savePastRecord(){
  const content=document.getElementById('pastContent').value.trim();
  const status=document.getElementById('pastStatus');
  if(!date||!content){status.textContent='날짜와 내용을 모두 입력해 주세요.';return}
- status.textContent='서버에 저장 중…';
+ status.textContent='작년, 오늘에 기록을 저장하고 있어요…';
  try{
   await saveEntryToNeon({entry_date:date,title:content.slice(0,200),content,visibility:'private',metadata:{}});
-  status.textContent='지난 기록을 Neon 서버에 저장했습니다.';
+  status.textContent='지난 기록을 작년, 오늘에 기록을 안전하게 저장했어요.';
   document.getElementById('pastContent').value='';
   showToast('지난 기록이 저장되었습니다.');
  }catch(e){status.textContent=e.message||'저장하지 못했습니다.'}
