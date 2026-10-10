@@ -1,5 +1,4 @@
 const { Pool } = require('pg');
-const { createRemoteJWKSet, jwtVerify } = require('jose');
 
 let pool;
 function getPool() {
@@ -17,6 +16,7 @@ function getPool() {
 }
 
 let jwks;
+let joseModule;
 async function requireUser(req) {
   const auth = req.headers.authorization || '';
   const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
@@ -28,8 +28,9 @@ async function requireUser(req) {
   const jwksUrl = process.env.NEON_AUTH_JWKS_URL;
   if (!jwksUrl) throw new Error('Neon Auth is not configured');
   try {
-    if (!jwks) jwks = createRemoteJWKSet(new URL(jwksUrl));
-    const { payload } = await jwtVerify(token, jwks);
+    if (!joseModule) joseModule = await import('jose');
+    if (!jwks) jwks = joseModule.createRemoteJWKSet(new URL(jwksUrl));
+    const { payload } = await joseModule.jwtVerify(token, jwks);
     const id = typeof payload.sub === 'string' ? payload.sub : '';
     if (!id) throw new Error('Missing subject');
     return { id, email: typeof payload.email === 'string' ? payload.email : undefined };
