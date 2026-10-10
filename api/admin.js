@@ -106,7 +106,7 @@ module.exports = async function handler(req, res) {
         (SELECT COALESCE(SUM(octet_length(content)),0)::bigint FROM public.lyt_entries WHERE deleted_at IS NULL) AS content_bytes,
         (SELECT COALESCE(SUM(byte_size),0)::bigint FROM public.lyt_entry_media) AS media_bytes,
         (SELECT COUNT(*)::int FROM public.lyt_entry_media) AS media_files`),
-      db.query(`SELECT u.id::text AS user_id,
+      db.query(`SELECT u.id::text AS user_id, u.email AS email,
         COALESCE(p.username, NULLIF(split_part(u.email, '@', 1), '')) AS username,
         COALESCE(p.display_name, u.name) AS display_name,
         COALESCE(p.nickname, p.display_name, u.name) AS nickname,
