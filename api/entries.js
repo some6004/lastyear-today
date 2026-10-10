@@ -62,11 +62,20 @@ module.exports = async function handler(req, res) {
       const body = req.body || {};
       const values = cleanEntry(body);
       if (req.method === 'POST') {
+        let journalId = null;
+        const journalName = String(body.journal_name || '').trim().slice(0, 160);
+        if (journalName) {
+          const journal = await db.query(
+            'SELECT id FROM public.lyt_journals WHERE owner_id = $1 AND title = $2 AND deleted_at IS NULL ORDER BY created_at ASC LIMIT 1',
+            [user.id, journalName]
+          );
+          if (journal.rows[0]) journalId = journal.rows[0].id;
+        }
         const result = await db.query(
-          `INSERT INTO public.lyt_entries (owner_id, entry_date, title, content, visibility, metadata)
-           VALUES ($1, $2::date, $3, $4, $5, $6::jsonb)
-           RETURNING id, entry_date, title, content, visibility, metadata, created_at, updated_at`,
-          [user.id, values.entryDate, values.title, values.content, values.visibility, JSON.stringify(values.metadata)]
+          `INSERT INTO public.lyt_entries (owner_id, journal_id, entry_date, title, content, visibility, metadata)
+           VALUES ($1, $2::uuid, $3::date, $4, $5, $6, $7::jsonb)
+           RETURNING id, journal_id, entry_date, title, content, visibility, metadata, created_at, updated_at`,
+          [user.id, journalId, values.entryDate, values.title, values.content, values.visibility, JSON.stringify(values.metadata)]
         );
         return res.status(201).json({ entry: result.rows[0] });
       }
