@@ -38,8 +38,8 @@ textarea{min-height:135px;font-size:19px}.ask-bottom{align-items:end}.example-gr
 <div class="eyebrow">AI MEMORY · ASK YOUR RECORDS</div>
 <h1>내 기록에게<br>무엇이든 물어보세요.</h1>
 <p class="lead">기록장을 나누어 관리해도 괜찮아요.<br>내가 허용한 기록을 AI가 함께 연결해 필요한 정보를 찾아드립니다.</p>
-<section class="ask-area"><div class="ask-label">ASK MY RECORDS</div><textarea id="question" placeholder="예: 작년 여름에 내가 갔던 여행을 정리해줘."></textarea><div class="ask-bottom"><span class="status" id="status">아직 AI가 연결되지 않았습니다.</span><button class="ask-btn" onclick="ask()">질문하기 →</button></div></section>
-<section class="answer" id="answer"><div class="answer-label">AI ANSWER · DEMO</div><p id="answerText"></p></section>
+<section class="ask-area"><div class="ask-label">ASK MY RECORDS</div><textarea id="question" placeholder="예: 작년 여름에 내가 갔던 여행을 정리해줘."></textarea><div class="ask-bottom"><span class="status" id="status">내 기록을 AI로 검색합니다.</span><button class="ask-btn" onclick="ask()">질문하기 →</button></div></section>
+<section class="answer" id="answer"><div class="answer-label">AI ANSWER</div><p id="answerText"></p></section>
 <section class="examples"><h2>이렇게 물어볼 수 있어요.</h2><div class="example-grid">
 <div class="example" onclick="fill('작년 여름에 내가 갔던 여행을 정리해줘.')"><strong>“작년 여름에 내가 갔던 여행을 정리해줘.”</strong><span>여행 기록 · 날짜 · 장소</span></div>
 <div class="example" onclick="fill('내가 지난 1년 동안 했던 일을 이력서에 쓸 경력으로 정리해줘.')"><strong>“지난 1년 동안 했던 일을 이력서에 쓸 경력으로 정리해줘.”</strong><span>업무 기록 · 기간 · 역할</span></div>
@@ -52,10 +52,43 @@ textarea{min-height:135px;font-size:19px}.ask-bottom{align-items:end}.example-gr
 </main>
 <footer class="footer"><span>© 2026 작년, 오늘</span><span>나의 모든 기록을 기억하는 개인 AI 아카이브</span></footer>
 </div>
+<script src="neon-auth.js?v=20261011-ai-search"></script>
 <script>
 const q=document.getElementById('question'),statusEl=document.getElementById('status'),answer=document.getElementById('answer'),answerText=document.getElementById('answerText');
+const answerLabel=document.querySelector('.answer-label');
 function fill(text){q.value=text;q.focus();window.scrollTo({top:q.getBoundingClientRect().top+window.scrollY-90,behavior:'smooth'})}
-function ask(){const text=q.value.trim();if(!text){q.focus();return}statusEl.textContent='AI 연결 준비 중입니다.';answer.classList.add('show');answerText.textContent='현재는 화면과 질문 흐름을 먼저 준비한 데모입니다. AI가 연결되면 내 기록을 검색하고 여러 기록을 연결해 이 질문에 대한 답을 보여드릴 수 있습니다.'}
+function renderSources(sources){
+ let box=document.getElementById('aiSources');
+ if(!box){box=document.createElement('div');box.id='aiSources';box.style.cssText='margin-top:22px;padding-top:18px;border-top:1px solid var(--rule);font:12px/1.8 Pretendard,sans-serif;color:var(--soft)';answer.appendChild(box)}
+ box.replaceChildren();
+ if(!Array.isArray(sources)||!sources.length)return;
+ const heading=document.createElement('strong');heading.textContent='참고한 내 기록';heading.style.cssText='display:block;margin-bottom:8px;color:var(--ink);font-weight:500';box.appendChild(heading);
+ sources.forEach(s=>{const row=document.createElement('div');row.style.marginTop='6px';row.textContent=(s.date||'날짜 미상')+' · '+(s.journal||'기록장')+' · '+(s.title||'제목 없는 기록');box.appendChild(row)});
+}
+async function ask(){
+ const text=q.value.trim();if(!text){q.focus();return}
+ const btn=document.querySelector('.ask-btn');btn.disabled=true;btn.textContent='찾는 중…';statusEl.textContent='내 기록을 검색하고 AI가 답을 정리하고 있어요.';
+ answer.classList.add('show');answerLabel.textContent='AI MEMORY · SEARCHING';answerText.textContent='기록을 확인하고 있습니다…';
+ const prior=document.getElementById('aiSources');if(prior)prior.remove();
+ try{
+  if(!window.LYT_AUTH_CLIENT)throw new Error('로그인 기능을 불러오지 못했습니다. 페이지를 새로고침해 주세요.');
+  const sessionResult=await window.LYT_AUTH_CLIENT.auth.getSession();
+  const session=sessionResult&&sessionResult.data&&sessionResult.data.session;
+  const token=session&&session.access_token;
+  if(!token){throw new Error('AI 기록 검색은 로그인 후 이용할 수 있어요. 로그인한 뒤 다시 시도해 주세요.')}
+  const response=await fetch('/api/ai-search',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({question:text})});
+  const data=await response.json();
+  if(!response.ok)throw new Error(data.error||'AI 검색에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+  answerLabel.textContent='AI ANSWER · YOUR RECORDS';answerText.textContent=data.answer||'관련 기록을 찾지 못했습니다.';
+  renderSources(data.sources);statusEl.textContent=(data.recordCount||0)+'개의 내 기록을 확인했습니다.';
+ }catch(error){answerLabel.textContent='AI MEMORY · NOTICE';answerText.textContent=error.message||'오류가 발생했습니다.';statusEl.textContent='검색을 완료하지 못했습니다.'}
+ finally{btn.disabled=false;btn.textContent='질문하기 →'}
+}
+q.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter')ask()});
+</script>
+<script src="site-common.js"></script>
+function fill(text){q.value=text;q.focus();window.scrollTo({top:q.getBoundingClientRect().top+window.scrollY-90,behavior:'smooth'})}
+function ask(){const text=q.value.trim();if(!text){q.focus();return}statusEl.textContent='AI 연결 준비 중입니다.';answer.classList.add('show');answerText.textContent=''}
 q.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter')ask()});
 </script>
 <script src="site-common.js"></script>
