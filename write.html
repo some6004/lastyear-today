@@ -115,6 +115,7 @@ async function generateKeywordDraft(){
  }catch(e){if(request===keywordDraftRequest)status.textContent=e.message||'문장을 만들지 못했어요.'}
  finally{if(request===keywordDraftRequest)btn.disabled=keywordRemaining<=0}
 }
+refreshKeywordUsage();
 function useKeywordDraft(replace){
  const area=document.getElementById('content');if(!keywordDraftText)return;
  if(replace||!area.value.trim())area.value=keywordDraftText;
