@@ -101,7 +101,7 @@ async function saveRecord(){
  const btn=document.querySelector('.save');if(btn)btn.disabled=true;
  status.textContent='Neon 서버에 저장 중…';
  try{
-  await saveEntryToNeon({entry_date:date,title:content.split(/\n/)[0].slice(0,200),content,visibility:document.getElementById('public').checked?'public':'private',metadata:window.LYT_selectedImage?{imageDataUrl:window.LYT_selectedImage}:window.LYT_selectedImageUrl?{imageUrl:window.LYT_selectedImageUrl}:{}});
+  await saveEntryToNeon({entry_date:date,journal_name:selectedJournal||'',title:content.split(/\n/)[0].slice(0,200),content,visibility:document.getElementById('public').checked?'public':'private',metadata:window.LYT_selectedImage?{imageDataUrl:window.LYT_selectedImage}:window.LYT_selectedImageUrl?{imageUrl:window.LYT_selectedImageUrl}:{}});
   status.textContent=document.getElementById('public').checked?'공개 기록을 서버에 저장했습니다.':'비공개 기록을 서버에 저장했습니다.';
   showToast('서버에 저장되었습니다.');
  }catch(e){status.textContent=e.message||'저장하지 못했습니다.';showToast('저장 실패')}
