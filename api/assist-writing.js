@@ -36,8 +36,8 @@ module.exports = async function handler(req, res) {
       headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'gpt-5-nano',
-        max_completion_tokens: 450,
-        reasoning_effort: 'low',
+        max_completion_tokens: 1200,
+        reasoning_effort: 'minimal',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
@@ -49,8 +49,12 @@ module.exports = async function handler(req, res) {
       console.error('OpenAI writing error:', upstream.status, data && data.error && data.error.code);
       return res.status(502).json({ error: 'AI 문장 생성 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.' });
     }
-    const draft = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
-    if (!draft) return res.status(502).json({ error: 'AI가 문장을 반환하지 않았습니다. 다시 시도해 주세요.' });
+    const choice = data.choices && data.choices[0];
+    const draft = choice && choice.message && choice.message.content;
+    if (!draft || !String(draft).trim()) {
+      console.error('OpenAI writing empty response:', JSON.stringify({ model: data.model, finish_reason: choice && choice.finish_reason, usage: data.usage, message: choice && choice.message && { refusal: choice.message.refusal, finish_reason: choice.finish_reason } }));
+      return res.status(502).json({ error: 'AI가 문장을 완성하지 못했습니다. 다시 시도해 주세요.' });
+    }
     return res.status(200).json({ draft: String(draft).trim() });
   } catch (error) {
     console.error('Writing assistant error:', error && error.message);
