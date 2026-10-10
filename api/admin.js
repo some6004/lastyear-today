@@ -50,17 +50,23 @@ module.exports = async function handler(req, res) {
     const db = getPool();
     const [stats, members, contentStats, entries] = await Promise.all([
       db.query(`SELECT
-        (SELECT COUNT(*)::int FROM public.lyt_profiles) AS members,
+        (SELECT COUNT(*)::int FROM neon_auth."user") AS members,
         (SELECT COUNT(*)::int FROM public.lyt_journals WHERE deleted_at IS NULL) AS journals,
         (SELECT COUNT(*)::int FROM public.lyt_entries WHERE deleted_at IS NULL) AS entries,
         (SELECT COUNT(*)::bigint FROM public.lyt_entries WHERE deleted_at IS NULL) AS active_entries,
         (SELECT COALESCE(SUM(octet_length(content)),0)::bigint FROM public.lyt_entries WHERE deleted_at IS NULL) AS content_bytes,
         (SELECT COALESCE(SUM(byte_size),0)::bigint FROM public.lyt_entry_media) AS media_bytes,
         (SELECT COUNT(*)::int FROM public.lyt_entry_media) AS media_files`),
-      db.query(`SELECT p.user_id, p.username, p.display_name, p.nickname, p.birth_date, p.phone, p.created_at,
-        (SELECT COUNT(*)::int FROM public.lyt_journals j WHERE j.owner_id=p.user_id AND j.deleted_at IS NULL) AS journal_count,
-        (SELECT COUNT(*)::int FROM public.lyt_entries e WHERE e.owner_id=p.user_id AND e.deleted_at IS NULL) AS entry_count
-        FROM public.lyt_profiles p ORDER BY p.created_at DESC NULLS LAST LIMIT 500`),
+      db.query(`SELECT u.id::text AS user_id,
+        COALESCE(p.username, NULLIF(split_part(u.email, '@', 1), '')) AS username,
+        COALESCE(p.display_name, u.name) AS display_name,
+        COALESCE(p.nickname, p.display_name, u.name) AS nickname,
+        p.birth_date, p.phone, COALESCE(p.created_at, u."createdAt") AS created_at,
+        (SELECT COUNT(*)::int FROM public.lyt_journals j WHERE j.owner_id=u.id::text AND j.deleted_at IS NULL) AS journal_count,
+        (SELECT COUNT(*)::int FROM public.lyt_entries e WHERE e.owner_id=u.id::text AND e.deleted_at IS NULL) AS entry_count
+        FROM neon_auth."user" u
+        LEFT JOIN public.lyt_profiles p ON p.user_id=u.id::text
+        ORDER BY u."createdAt" DESC NULLS LAST LIMIT 500`),
       db.query(`SELECT date_trunc('month', created_at) AS month,
         COUNT(*)::int AS entries, COALESCE(SUM(octet_length(content)),0)::bigint AS content_bytes
         FROM public.lyt_entries WHERE deleted_at IS NULL
