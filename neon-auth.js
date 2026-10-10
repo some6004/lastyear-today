@@ -21,6 +21,7 @@
       async updateUser(attributes) { return (await clientPromise).updateUser(attributes); },
       async verifyOtp(params) { return (await clientPromise).verifyOtp(params); },
       async resend(params) { return (await clientPromise).resend(params); },
+      async setSession(session) { return (await clientPromise).setSession(session); },
       async signOut() { return (await clientPromise).signOut(); },
       async getUser() { return (await clientPromise).getUser(); },
       async onAuthStateChange(callback) { return (await clientPromise).onAuthStateChange(callback); }
