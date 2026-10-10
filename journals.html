@@ -61,7 +61,7 @@ async function syncJournalsToServer(items){
    const local=items.find(j=>j.id===saved.id)||items.find(j=>j.name===saved.name&& (j.desc||'')===(saved.description||''));
    if(local){local.id=saved.id;local.visibility=saved.visibility||'private'}
   }
-  localStorage.setItem(customKey,JSON.stringify(items));
+  journalCache=items;
   accountMessage('Neon 서버 동기화 완료');
  }catch(e){console.error('journal sync failed',e);accountMessage('서버 저장 오류 · 다시 로그인하거나 잠시 후 시도해 주세요')}
  finally{serverSyncBusy=false}
@@ -92,7 +92,7 @@ async function initServerSync(){
   const result=await response.json();
   if(!response.ok)throw new Error(result.error||'Neon 기록 불러오기 실패');
   const rows=result.journals||[];
-  const local=getCustom();
+  const local=[];
   let merged=rows.map(r=>({id:r.id,name:r.name,desc:r.description||'',image:r.image||'',visibility:r.visibility||'private'}));
   if(rows.length===0){
     merged=local.map(j=>({...j,id:j.id||newId()}));
@@ -103,7 +103,7 @@ async function initServerSync(){
       }
     }
   }
-  localStorage.setItem(customKey,JSON.stringify(merged));
+  journalCache=merged;
   render();renderDeleted();
   await syncJournalsToServer(merged);
  }catch(e){
@@ -114,6 +114,8 @@ async function initServerSync(){
 
 const customKey='lyt_journals';
 const deletedKey='lyt_deleted_journals';
+let journalCache=[];
+let deletedCache=[];
 const DAY=24*60*60*1000;
 const samples=[
 'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=700&q=75',
@@ -126,10 +128,10 @@ const samples=[
 'https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&w=700&q=75'
 ];
 let editIndex=-1, selectedImage='';
-function getCustom(){try{return JSON.parse(localStorage.getItem(customKey)||'[]')}catch(e){return[]}}
-function saveCustom(a){if(!currentUser){accountMessage('기록장을 저장하려면 먼저 로그인해 주세요.');return false}localStorage.setItem(customKey,JSON.stringify(a));syncJournalsToServer(a);return true}
-function getDeleted(){try{return JSON.parse(localStorage.getItem(deletedKey)||'[]')}catch(e){return[]}}
-function saveDeleted(a){if(!currentUser){accountMessage('기록장을 관리하려면 먼저 로그인해 주세요.');return false}localStorage.setItem(deletedKey,JSON.stringify(a));return true}
+function getCustom(){return journalCache}
+function saveCustom(a){if(!currentUser){accountMessage('기록장을 저장하려면 먼저 로그인해 주세요.');return false}journalCache=a;syncJournalsToServer(a);return true}
+function getDeleted(){return deletedCache}
+function saveDeleted(a){if(!currentUser){accountMessage('기록장을 관리하려면 먼저 로그인해 주세요.');return false}deletedCache=a;return true}
 function purgeDeleted(){const now=Date.now();const kept=getDeleted().filter(j=>j.expiresAt>now);if(kept.length!==getDeleted().length)saveDeleted(kept);return kept}
 function formatDate(ts){const d=new Date(ts);return d.getFullYear()+'. '+String(d.getMonth()+1).padStart(2,'0')+'. '+String(d.getDate()).padStart(2,'0')}
 function daysLeft(ts){return Math.max(0,Math.ceil((ts-Date.now())/DAY))}
