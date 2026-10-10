@@ -6,11 +6,12 @@
         link.className=node.className;
         link.href='index.html';
         link.setAttribute('aria-label','작년, 오늘 메인으로');
-        link.innerHTML=node.innerHTML;
+        link.innerHTML=brandMarkup();
         node.replaceWith(link);
       }else{
         node.setAttribute('aria-label',node.getAttribute('aria-label')||'작년, 오늘 메인으로');
         if(!node.getAttribute('href'))node.href='index.html';
+        node.innerHTML=brandMarkup();
       }
     });
   }
