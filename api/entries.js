@@ -44,6 +44,17 @@ module.exports = async function handler(req, res) {
     const db = getPool();
 
     if (req.method === 'GET') {
+      const id = typeof req.query.id === 'string' ? req.query.id : null;
+      if (id) {
+        if (!UUID.test(id)) return res.status(400).json({ error: '기록 주소가 올바르지 않습니다.' });
+        const one = await db.query(
+          `SELECT id, entry_date, title, content, visibility, metadata, created_at, updated_at
+           FROM public.lyt_entries WHERE id=$1::uuid AND owner_id=$2 AND deleted_at IS NULL LIMIT 1`,
+          [id, user.id]
+        );
+        if (!one.rows[0]) return res.status(404).json({ error: '기록을 찾을 수 없습니다.' });
+        return res.status(200).json({ entry: one.rows[0] });
+      }
       const date = typeof req.query.date === 'string' ? req.query.date : null;
       if (date && !validDate(date)) return res.status(400).json({ error: '기록 날짜를 확인해 주세요.' });
       const result = await db.query(
