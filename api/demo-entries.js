@@ -33,12 +33,22 @@ module.exports = async function handler(req, res) {
       const date = typeof req.query.date === 'string' ? req.query.date : '';
       if (id) {
         if (!UUID.test(id)) return res.status(400).json({ error: '기록 주소가 올바르지 않습니다.' });
-        const result = await db.query('SELECT id,entry_date,title,content,visibility,metadata,created_at,updated_at FROM public.lyt_demo_entries WHERE id=$1::uuid LIMIT 1',[id]);
-        if (!result.rows[0]) return res.status(404).json({ error: '시연 기록을 찾을 수 없습니다.' });
+        const result = await db.query(`SELECT id,entry_date,title,content,visibility,metadata,created_at,updated_at FROM public.lyt_demo_entries WHERE id=$1::uuid
+          UNION ALL
+          SELECT id,entry_date,title,content,visibility,metadata,created_at,updated_at FROM public.lyt_entries WHERE id=$1::uuid AND deleted_at IS NULL
+          LIMIT 1`,[id]);
+        if (!result.rows[0]) return res.status(404).json({ error: '기록을 찾을 수 없습니다.' });
         return res.status(200).json({ entry: safe(result.rows[0]) });
       }
       if (date && !validDate(date)) return res.status(400).json({ error: '기록 날짜를 확인해 주세요.' });
-      const result = await db.query('SELECT id,entry_date,title,content,visibility,metadata,created_at,updated_at FROM public.lyt_demo_entries WHERE ($1::date IS NULL OR entry_date=$1::date) ORDER BY entry_date DESC,created_at DESC LIMIT 500',[date || null]);
+      const result = await db.query(`SELECT id,entry_date,title,content,visibility,metadata,created_at,updated_at
+        FROM (
+          SELECT id,entry_date,title,content,visibility,metadata,created_at,updated_at FROM public.lyt_demo_entries
+          UNION ALL
+          SELECT id,entry_date,title,content,visibility,metadata,created_at,updated_at FROM public.lyt_entries WHERE deleted_at IS NULL
+        ) all_entries
+        WHERE ($1::date IS NULL OR entry_date=$1::date)
+        ORDER BY entry_date DESC,created_at DESC LIMIT 1000`,[date || null]);
       return res.status(200).json({ entries: result.rows.map(safe) });
     }
     if (req.method === 'POST') {
