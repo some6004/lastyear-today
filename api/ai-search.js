@@ -14,7 +14,7 @@ module.exports = async function handler(req, res) {
     const result = await db.query(
       `SELECT id, entry_date, title, content, metadata
        FROM (
-         SELECT id, entry_date, title, content, metadata, created_at FROM public.lyt_demo_entries WHERE COALESCE(metadata->>'_lyt_kind','') <> 'lyt_demo_journal'
+         SELECT id, entry_date, title, content, metadata, created_at FROM public.lyt_demo_entries WHERE COALESCE(metadata->>'_lyt_kind','') NOT LIKE 'lyt_demo_%'
          UNION ALL
          SELECT id, entry_date, title, content, metadata, created_at FROM public.lyt_entries WHERE deleted_at IS NULL
        ) all_entries
