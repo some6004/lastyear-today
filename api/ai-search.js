@@ -1,4 +1,4 @@
-const { getPool, requireUser, sendError } = require('./_db');
+const { getPool, sendError } = require('./_db');
 
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
@@ -7,24 +7,20 @@ module.exports = async function handler(req, res) {
   if (!process.env.OPENAI_API_KEY) return res.status(503).json({ error: 'AI 검색 API 키가 설정되지 않았습니다. Vercel 환경변수 OPENAI_API_KEY를 확인해 주세요.' });
 
   try {
-    const user = await requireUser(req);
     const question = typeof (req.body && req.body.question) === 'string' ? req.body.question.trim().slice(0, 1200) : '';
     if (question.length < 2) return res.status(400).json({ error: '질문을 두 글자 이상 입력해 주세요.' });
 
     const db = getPool();
     const result = await db.query(
-      `SELECT e.id, e.entry_date, e.title, e.content, e.metadata, j.title AS journal_title
-       FROM public.lyt_entries e
-       LEFT JOIN public.lyt_journals j ON j.id = e.journal_id AND j.owner_id = e.owner_id AND j.deleted_at IS NULL
-       WHERE e.owner_id = $1 AND e.deleted_at IS NULL
-       ORDER BY e.entry_date DESC, e.updated_at DESC
-       LIMIT 300`,
-      [user.id]
+      `SELECT id, entry_date, title, content, metadata
+       FROM public.lyt_demo_entries
+       ORDER BY entry_date DESC, created_at DESC
+       LIMIT 300`
     );
     const entries = result.rows.map((row, index) => ({
       ref: 'R' + (index + 1),
       date: row.entry_date ? String(row.entry_date).slice(0, 10) : '',
-      journal: row.journal_title || '기본 기록장',
+      journal: '전체 공개 기록',
       title: String(row.title || '').trim() || '제목 없는 기록',
       content: String(row.content || '').slice(0, 5000)
     }));
