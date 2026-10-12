@@ -33,7 +33,7 @@ textarea{min-height:135px;font-size:19px}.ask-bottom{align-items:end}.example-gr
 </head>
 <body>
 <div class="page">
-<header class="top"><a class="logo" href="index.html" aria-label="작년, 오늘"><span>작</span><span>년</span><span>,</span><span> 오늘</span></a><a href="journals.html">내 기록장으로</a></header>
+<header class="top"><a class="logo" href="index.html" aria-label="작년, 오늘"><span>작</span><span>년</span><span>,</span><span> 오늘</span></a><a href="all-records.html">내 기록장으로</a></header>
 <main class="main">
 <div class="eyebrow">AI MEMORY · ASK YOUR RECORDS</div>
 <h1>내 기록에게<br>무엇이든 물어보세요.</h1>
@@ -71,12 +71,7 @@ async function ask(){
  answer.classList.add('show');answerLabel.textContent='AI MEMORY · SEARCHING';answerText.textContent='기록을 확인하고 있습니다…';
  const prior=document.getElementById('aiSources');if(prior)prior.remove();
  try{
-  if(!window.LYT_AUTH_CLIENT)throw new Error('로그인 기능을 불러오지 못했습니다. 페이지를 새로고침해 주세요.');
-  const sessionResult=await window.LYT_AUTH_CLIENT.auth.getSession();
-  const session=sessionResult&&sessionResult.data&&sessionResult.data.session;
-  const token=session&&session.access_token;
-  if(!token){throw new Error('AI 기록 검색은 로그인 후 이용할 수 있어요. 로그인한 뒤 다시 시도해 주세요.')}
-  const response=await fetch('/api/ai-search',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({question:text})});
+  const response=await fetch('/api/ai-search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:text})});
   const data=await response.json();
   if(!response.ok)throw new Error(data.error||'AI 검색에 실패했습니다. 잠시 후 다시 시도해 주세요.');
   answerLabel.textContent='AI ANSWER · YOUR RECORDS';answerText.textContent=data.answer||'관련 기록을 찾지 못했습니다.';
