@@ -43,7 +43,7 @@ module.exports = async function handler(req, res) {
       if (date && !validDate(date)) return res.status(400).json({ error: '기록 날짜를 확인해 주세요.' });
       const result = await db.query(`SELECT id,entry_date,title,content,visibility,metadata,created_at,updated_at
         FROM (
-          SELECT id,entry_date,title,content,visibility,metadata,created_at,updated_at FROM public.lyt_demo_entries
+          SELECT id,entry_date,title,content,visibility,metadata,created_at,updated_at FROM public.lyt_demo_entries WHERE COALESCE(metadata->>'_lyt_kind','') <> 'lyt_demo_journal'
           UNION ALL
           SELECT id,entry_date,title,content,visibility,metadata,created_at,updated_at FROM public.lyt_entries WHERE deleted_at IS NULL
         ) all_entries
