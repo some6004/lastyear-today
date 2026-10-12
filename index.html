@@ -194,32 +194,23 @@ function shareKakao(){
  else{copyShareUrl();}
 }
 
-// 메인 히어로: 비로그인 방문자에게는 예시임을 분명히 표시하고,
-// 로그인 정보와 작년 오늘에 해당하는 저장 기록이 있으면 개인 기록으로 바꿉니다.
-(function(){
+// 메인 히어로는 브라우저 저장소가 아니라 서버의 프로필과 기록을 사용합니다.
+(async function(){
  const label=document.getElementById('heroMemoryLabel'),title=document.getElementById('heroMemoryTitle'),body=document.getElementById('heroMemoryText');
  if(!label||!title||!body)return;
  try{
-  const info=JSON.parse(localStorage.getItem('lyt_my_info')||'null');
-  if(!info||!info.name){label.textContent='예시 기록 · 2025년 10월 9일 · 1년 전 오늘';return;}
   const now=new Date(),target=new Date(now.getFullYear()-1,now.getMonth(),now.getDate());
   const key=target.getFullYear()+'-'+String(target.getMonth()+1).padStart(2,'0')+'-'+String(target.getDate()).padStart(2,'0');
-  const sources=['lyt_records','lyt_entries','lyt_diary_records','lyt_saved_records'];
-  let found=null;
-  for(const k of sources){
-   const raw=localStorage.getItem(k);if(!raw)continue;
-   const parsed=JSON.parse(raw);const arr=Array.isArray(parsed)?parsed:(parsed&&Array.isArray(parsed.records)?parsed.records:[]);
-   found=arr.find(x=>(x.date||x.day||x.createdAt||'').slice(0,10)===key);
-   if(found)break;
-  }
+  const [pr,rr]=await Promise.all([fetch('/api/demo-profile',{cache:'no-store'}),fetch('/api/demo-entries?date='+key,{cache:'no-store'})]);
+  const pd=await pr.json(),rd=await rr.json();const info=pd.profile||{};const found=(rd.entries||[])[0];
   if(found){
-   label.textContent=info.name+'님의 기록 · '+target.getFullYear()+'년 '+(target.getMonth()+1)+'월 '+target.getDate()+'일 · 1년 전 오늘';
-   title.textContent=found.title||found.content||found.text||'작년 오늘의 기록';
-   body.textContent=(found.content||found.text||found.body||'내가 남긴 기록을 다시 만나보세요.').slice(0,140);
+   label.textContent=(info.name?info.name+'님의 ':'')+'기록 · '+target.getFullYear()+'년 '+(target.getMonth()+1)+'월 '+target.getDate()+'일 · 1년 전 오늘';
+   title.textContent=found.title||found.content||'작년 오늘의 기록';
+   body.textContent=(found.content||'내가 남긴 기록을 다시 만나보세요.').slice(0,140);
   }else{
-   label.textContent=info.name+'님을 위한 미리보기 · 작년 오늘';
+   label.textContent=info.name?info.name+'님을 위한 미리보기 · 작년 오늘':'예시 기록 · 작년 오늘';
    title.textContent='작년 오늘의 기록을 만나보세요.';
-   body.textContent='현재 저장된 작년 오늘의 기록을 찾지 못했어요. 기록 기능과 연결되면 이곳에 내 기록이 표시됩니다.';
+   body.textContent='기록을 남기면 같은 날의 기록을 이곳에서 다시 만날 수 있어요.';
   }
  }catch(e){label.textContent='예시 기록 · 작년 오늘';}
 })();
