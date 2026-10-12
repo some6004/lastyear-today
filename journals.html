@@ -263,7 +263,7 @@ window.toggleShare=toggleShare;
 window.copyJournalUrl=copyJournalUrl;
 window.shareJournal=shareJournal;
 
-try{const d=JSON.parse(localStorage.getItem("lyt_my_info")||"{}");if(d.name)document.getElementById("profileGreeting").textContent=d.name+"님, 오늘의 일상은 어땠나요?";if(d.description)document.getElementById("profileDescription").textContent=d.description;}catch(e){console.warn('my-info load failed',e)}
+fetch('/api/demo-profile',{cache:'no-store'}).then(r=>r.json()).then(({profile:d})=>{if(d&&d.name)document.getElementById("profileGreeting").textContent=d.name+"님, 오늘의 일상은 어땠나요?";if(d&&d.description)document.getElementById("profileDescription").textContent=d.description||''}).catch(e=>console.warn('server profile load failed',e))
 </script>
 <script src="site-common.js"></script>
 </body>
