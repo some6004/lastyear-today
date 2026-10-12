@@ -13,7 +13,11 @@ module.exports = async function handler(req, res) {
     const db = getPool();
     const result = await db.query(
       `SELECT id, entry_date, title, content, metadata
-       FROM public.lyt_demo_entries
+       FROM (
+         SELECT id, entry_date, title, content, metadata, created_at FROM public.lyt_demo_entries
+         UNION ALL
+         SELECT id, entry_date, title, content, metadata, created_at FROM public.lyt_entries WHERE deleted_at IS NULL
+       ) all_entries
        ORDER BY entry_date DESC, created_at DESC
        LIMIT 300`
     );
