@@ -86,11 +86,32 @@ async function initServerSync(){
   const demoMode=true;
   if(demoMode){
     currentUser=null;
+    accountMessage("서버에서 기록장을 불러오고 있어요…");
+    let oldActive=[],oldDeleted=[];
+    try{oldActive=JSON.parse(localStorage.getItem("lyt_journals")||"[]");if(!Array.isArray(oldActive))oldActive=[];}catch(_){}
+    try{oldDeleted=JSON.parse(localStorage.getItem("lyt_deleted_journals")||"[]");if(!Array.isArray(oldDeleted))oldDeleted=[];}catch(_){}
+    const response=await fetch('/api/demo-journals',{cache:'no-store'});
+    let data=await response.json();
+    if(!response.ok)throw new Error(data.error||'서버 기록장을 불러오지 못했어요.');
+    const oldRows=[...oldActive,...oldDeleted].filter(j=>j&&j.name).map(j=>({...j,desc:j.desc||'',image:j.image||''}));
+    if(oldRows.length){
+      const existing=new Set([...(data.journals||[]),...(data.deleted||[])].map(j=>j.id).filter(Boolean));
+      const pending=oldRows.filter(j=>!j.id||!existing.has(j.id));
+      if(pending.length){
+        const migrated=await fetch('/api/demo-journals',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({journals:pending})});
+        const md=await migrated.json();
+        if(!migrated.ok)throw new Error(md.error||'기존 브라우저 기록장을 서버로 옮기지 못했어요.');
+        data.journals=[...(data.journals||[]),...(md.journals||[]).filter(j=>!j.deletedAt)];
+        data.deleted=[...(data.deleted||[]),...(md.journals||[]).filter(j=>j.deletedAt)];
+      }
+      localStorage.removeItem('lyt_journals');
+      localStorage.removeItem('lyt_deleted_journals');
+    }
+    journalCache=data.journals||[];
+    deletedCache=data.deleted||[];
     journalsLoading=false;
-    try{journalCache=JSON.parse(localStorage.getItem("lyt_journals")||"[]");if(!Array.isArray(journalCache))journalCache=[];}catch(_){journalCache=[];}
-    try{deletedCache=JSON.parse(localStorage.getItem("lyt_deleted_journals")||"[]");if(!Array.isArray(deletedCache))deletedCache=[];}catch(_){deletedCache=[];}
     const link=document.getElementById("accountLink");if(link){link.textContent="데모 모드";link.href="all-records.html";}
-    accountMessage("데모 버전 · 로그인 없이 기록장을 둘러볼 수 있어요.");
+    accountMessage("서버 저장 사용 중 · 모든 기기에서 같은 기록장을 볼 수 있어요.");
     render();renderDeleted();
     return;
   }
@@ -157,10 +178,10 @@ const samples=[
 ];
 let editIndex=-1, selectedImage='';
 function getCustom(){return journalCache}
-function saveCustom(a){if(!currentUser){accountMessage('기록장을 저장하려면 먼저 로그인해 주세요.');return false}journalCache=a;syncJournalsToServer(a);return true}
+async function saveCustom(a){const response=await fetch('/api/demo-journals',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({journals:a})});const result=await response.json();if(!response.ok)throw new Error(result.error||'기록장을 서버에 저장하지 못했어요.');journalCache=(result.journals||[]).filter(j=>!j.deletedAt);accountMessage('서버에 저장했습니다.');return true}
 function getDeleted(){return deletedCache}
-function saveDeleted(a){if(!currentUser){accountMessage('기록장을 관리하려면 먼저 로그인해 주세요.');return false}deletedCache=a;return true}
-function purgeDeleted(){const now=Date.now();const kept=getDeleted().filter(j=>j.expiresAt>now);if(kept.length!==getDeleted().length)saveDeleted(kept);return kept}
+async function saveDeleted(a){const response=await fetch('/api/demo-journals',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({journals:a})});const result=await response.json();if(!response.ok)throw new Error(result.error||'삭제 기록장을 서버에 저장하지 못했어요.');deletedCache=(result.journals||[]).filter(j=>j.deletedAt);return true}
+function purgeDeleted(){const now=Date.now();return getDeleted().filter(j=>j.expiresAt>now)}
 function formatDate(ts){const d=new Date(ts);return d.getFullYear()+'. '+String(d.getMonth()+1).padStart(2,'0')+'. '+String(d.getDate()).padStart(2,'0')}
 function daysLeft(ts){return Math.max(0,Math.ceil((ts-Date.now())/DAY))}
 function openModal(index=-1){editIndex=index;const j=index>=0?getCustom()[index]:{name:'',desc:'',image:''};document.getElementById('modalTitle').textContent=index>=0?'기록장 수정하기':'새 기록장 만들기';document.getElementById('deleteJournalBtn').style.display=index>=0?'inline-block':'none';document.getElementById('journalName').value=j.name||'';document.getElementById('journalDesc').value=j.desc||'';selectedImage=j.image||'';renderImages();document.getElementById('modal').classList.add('show');setTimeout(()=>document.getElementById('journalName').focus(),50)}
@@ -185,8 +206,8 @@ function showDeleteWarning(step,name){
  box.classList.add('show');
 }
 function cancelDelete(){document.getElementById('deleteWarning').classList.remove('show');document.getElementById('deleteWarning').innerHTML='';document.getElementById('editActions').style.display='flex'}
-function deleteJournal(){if(editIndex<0)return;const a=getCustom();const j=a[editIndex];const now=Date.now();const deleted={...j,deletedAt:now,expiresAt:now+(7*DAY),deletedId:String(now)+'_'+Math.random().toString(36).slice(2)};a.splice(editIndex,1);saveCustom(a);markJournalDeleted(j,true);const d=getDeleted().filter(x=>x.expiresAt>Date.now());d.unshift(deleted);saveDeleted(d.slice(0,20));editIndex=-1;cancelDelete();closeModal();render();renderDeleted();showToast('삭제했습니다.')}
-function restoreJournal(id){const d=purgeDeleted();const idx=d.findIndex(j=>j.deletedId===id);if(idx<0)return;const j=d[idx];const a=getCustom();const restored={id:j.id||newId(),name:j.name,desc:j.desc,image:j.image||''};a.push(restored);saveCustom(a);markJournalDeleted(j,false);d.splice(idx,1);saveDeleted(d);render();renderDeleted();showToast('복원했습니다.')}
+async function deleteJournal(){if(editIndex<0)return;const a=getCustom().map(j=>({...j}));const j=a[editIndex];const now=Date.now();const deleted={...j,deletedAt:now,expiresAt:now+(7*DAY),deletedId:String(now)+'_'+Math.random().toString(36).slice(2)};a.splice(editIndex,1);try{await saveCustom(a);await saveDeleted([deleted,...getDeleted().filter(x=>x.expiresAt>Date.now())].slice(0,20));editIndex=-1;cancelDelete();closeModal();render();renderDeleted();showToast('서버에서 삭제했습니다.')}catch(e){accountMessage(e.message||'삭제에 실패했어요.');showToast('삭제 실패 · 다시 시도해 주세요.')}}
+async function restoreJournal(id){const d=purgeDeleted();const idx=d.findIndex(j=>j.deletedId===id);if(idx<0)return;const j=d[idx];const a=getCustom().map(x=>({...x}));a.push({id:j.id,name:j.name,desc:j.desc,image:j.image||''});try{await saveCustom(a);await saveDeleted(d.filter((_,i)=>i!==idx));render();renderDeleted();showToast('서버에서 복원했습니다.')}catch(e){accountMessage(e.message||'복원에 실패했어요.');showToast('복원 실패 · 다시 시도해 주세요.')}}
 function renderDeleted(){
  const list=document.getElementById('deletedList');
  const section=document.getElementById('deletedSection');
@@ -212,7 +233,7 @@ function renderDeleted(){
  });
 }
 function showToast(message){const t=document.getElementById('toast');t.textContent=message;t.classList.add('show');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.classList.remove('show'),1800)}
-function saveJournal(){const name=document.getElementById('journalName').value.trim();const desc=document.getElementById('journalDesc').value.trim()||'나만의 기록을 차곡차곡 남깁니다.';if(!name)return;const wasEdit=editIndex>=0;const a=getCustom();const item={name,desc,image:selectedImage};if(wasEdit)a[editIndex]=item;else a.push(item);saveCustom(a);closeModal();render();showToast(wasEdit?'수정했습니다.':'저장되었습니다.')}
+async function saveJournal(){const name=document.getElementById('journalName').value.trim();const desc=document.getElementById('journalDesc').value.trim()||'나만의 기록을 차곡차곡 남깁니다.';if(!name)return;const wasEdit=editIndex>=0;const a=getCustom().map(j=>({...j}));const item={...(wasEdit?a[editIndex]:{}),name,desc,image:selectedImage};if(wasEdit)a[editIndex]=item;else a.push(item);try{await saveCustom(a);closeModal();render();showToast(wasEdit?'서버에 수정했습니다.':'서버에 저장했습니다.')}catch(e){accountMessage(e.message||'저장에 실패했어요.');showToast('저장 실패 · 다시 시도해 주세요.')}}
 function journalUrl(i){const j=getCustom()[i];return new URL('public-journal.html?journal='+encodeURIComponent(j.name),location.href).href}
 function toggleShare(e,i){e.stopPropagation();document.querySelectorAll('.share-menu.show').forEach(x=>{if(x.id!=='shareMenu'+i)x.classList.remove('show')});document.getElementById('shareMenu'+i).classList.toggle('show')}
 function copyJournalUrl(i,e){e.stopPropagation();const u=journalUrl(i);const done=()=>{const menu=document.getElementById('shareMenu'+i);let toast=menu.querySelector('.copy-toast');if(!toast){toast=document.createElement('span');toast.className='copy-toast';toast.textContent='복사되었습니다.';menu.appendChild(toast)}toast.classList.add('show');clearTimeout(toast._timer);toast._timer=setTimeout(()=>toast.classList.remove('show'),1500)};if(navigator.clipboard){navigator.clipboard.writeText(u).then(done).catch(()=>{});}else{const ta=document.createElement('textarea');ta.value=u;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done()}catch(_){}ta.remove()}}
