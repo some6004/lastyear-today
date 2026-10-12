@@ -15,5 +15,36 @@ function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;',
 function imageOf(r){return r&&r.metadata?(r.metadata.imageDataUrl||r.metadata.imageUrl||''):''}
 function keyDate(v){return String(v||'').slice(0,10)}
 async function load(){try{const res=await fetch('/api/demo-entries',{cache:'no-store'});const data=await res.json();if(!res.ok)throw new Error(data.error||'기록을 불러오지 못했습니다.');const rows=data.entries||[];count.textContent=rows.length+'개';if(!rows.length){feed.innerHTML='<div class="empty">아직 기록이 없어요.<br>첫 기록을 남겨보세요.<br><a href="write.html">기록하기 →</a></div>';return}feed.innerHTML=rows.map(r=>{const img=imageOf(r);const title=String(r.title||'').trim()||'제목 없는 기록';const body=String(r.content||'');return '<a class="item" href="record-view.html?demo=1&id='+encodeURIComponent(r.id)+'"><div class="thumb">'+(img?'<img src="'+escapeHtml(img)+'" alt="" loading="lazy">':'')+'</div><div><div class="date">'+escapeHtml(keyDate(r.entry_date))+'</div><h3>'+escapeHtml(title)+'</h3><p class="excerpt">'+escapeHtml(body)+'</p></div></a>'}).join('')}catch(e){count.textContent='불러오기 실패';feed.innerHTML='<div class="status">'+escapeHtml(e.message||'연결 오류가 발생했습니다.')+'<br>잠시 후 새로고침해 주세요.</div>'}}
-load();
+async function migrateLegacyLocalRecords(){
+ const keys=['lyt_records','lyt_entries','lyt_diary_records','lyt_saved_records'];
+ const legacy=[];
+ for(const key of keys){
+  let raw;try{raw=localStorage.getItem(key)}catch(_){continue}
+  if(!raw)continue;
+  try{
+   const parsed=JSON.parse(raw),arr=Array.isArray(parsed)?parsed:(parsed&&Array.isArray(parsed.records)?parsed.records:[]);
+   for(const x of arr){
+    if(!x||typeof x!=='object')continue;
+    const date=String(x.entry_date||x.entryDate||x.date||x.day||x.createdAt||'').slice(0,10);
+    const content=String(x.content||x.text||x.body||x.description||'').trim();
+    const title=String(x.title||'').trim();
+    if(/^\d{4}-\d{2}-\d{2}$/.test(date)&&content)legacy.push({entry_date:date,title,content,visibility:'public',metadata:{imageDataUrl:x.imageDataUrl||x.image_data_url||'',imageUrl:x.imageUrl||x.image_url||x.photo||x.image||''}});
+   }
+  }catch(e){console.warn('Legacy record parsing skipped:',key,e)}
+ }
+ if(!legacy.length)return;
+ try{
+  const currentResponse=await fetch('/api/demo-entries',{cache:'no-store'}),currentData=await currentResponse.json();
+  if(!currentResponse.ok)throw new Error(currentData.error||'현재 기록을 확인하지 못했습니다.');
+  const sig=x=>[String(x.entry_date||'').slice(0,10),String(x.title||'').trim(),String(x.content||'').trim()].join('|');
+  const seen=new Set((currentData.entries||[]).map(sig));
+  const missing=legacy.filter(x=>{const k=sig(x);if(seen.has(k))return false;seen.add(k);return true});
+  for(const item of missing){
+   const response=await fetch('/api/demo-entries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(item)});
+   const result=await response.json();if(!response.ok)throw new Error(result.error||'기존 기록을 서버로 옮기지 못했습니다.');
+  }
+  keys.forEach(key=>localStorage.removeItem(key));
+ }catch(e){console.warn('Legacy record migration pending:',e)}
+}
+migrateLegacyLocalRecords().finally(load);
 </script><script src="site-common.js"></script></body></html>
